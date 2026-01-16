@@ -19,14 +19,14 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Nunito', 'sans-serif'], // Softer, curvier font
+                        sans: ['Nunito', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
                         lust: {
-                            primary: '#e11d48', // Rose 600
-                            light: '#fb7185',   // Rose 400
-                            dark: '#881337',    // Rose 900
+                            primary: '#e11d48',
+                            light: '#fb7185',
+                            dark: '#881337',
                             glow: 'rgba(225, 29, 72, 0.5)'
                         },
                         night: {
@@ -52,45 +52,20 @@
     </script>
 
     <style>
-        /* Mobile Touch Optimizations */
+        /* Mobile Optimizations */
         button, select, input, textarea { touch-action: manipulation; }
-        
-        /* Custom Scrollbar for Dark Theme */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #e11d48; }
 
-        /* Markdown Styles */
         .markdown-body p { margin-bottom: 0.5em; line-height: 1.5; color: #e5e7eb; }
         .markdown-body p:last-child { margin-bottom: 0; }
-        
-        .markdown-body pre { 
-            background: #000; 
-            padding: 0.75rem; 
-            border-radius: 0.75rem; 
-            overflow-x: auto; 
-            margin: 0.5rem 0; 
-            border: 1px solid #333;
-        }
-        
+        .markdown-body pre { background: #000; padding: 0.75rem; border-radius: 0.75rem; overflow-x: auto; margin: 0.5rem 0; border: 1px solid #333; }
         .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #fb7185; }
-        .markdown-body :not(pre) > code { 
-            background: rgba(225, 29, 72, 0.1); 
-            padding: 0.1em 0.3em; 
-            border-radius: 0.2em; 
-        }
-        
-        /* Image styling */
+        .markdown-body :not(pre) > code { background: rgba(225, 29, 72, 0.1); padding: 0.1em 0.3em; border-radius: 0.2em; }
         .markdown-body img { border-radius: 1rem; max-width: 100%; height: auto; margin-top: 0.5rem; border: 1px solid #333; }
-        
-        /* Glassmorphism utility */
-        .glass {
-            background: rgba(18, 18, 18, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .glass { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
 <body class="bg-night-bg text-gray-100 h-[100dvh] flex flex-col overflow-hidden font-sans selection:bg-lust-primary selection:text-white">
@@ -98,10 +73,8 @@
     <!-- Header -->
     <header class="flex-none sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between shadow-lg shadow-lust-primary/5">
         <div class="flex items-center gap-3">
-            <!-- Avatar -->
             <div class="relative group cursor-pointer">
                 <div class="w-11 h-11 rounded-full bg-gradient-to-br from-lust-primary to-purple-800 flex items-center justify-center text-white shadow-lg shadow-rose-900/50 ring-2 ring-transparent group-hover:ring-lust-light transition-all duration-300">
-                    <!-- Lips Icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 5.5c-2.5 0-4.5 1.5-6 3.5-1.5-2-3.5-3.5-6-3.5C0 5.5 0 10 0 12c0 5 7 10 12 10s12-5 12-10c0-2 0-6.5-7-6.5zM12 19C7 19 2 15 2 12c0-1.5 1-3 3-3 1.5 0 3 .5 4 2 .5 1 2 1 3 0 1-1.5 2.5-2 4-2 2 0 3 1.5 3 3 0 3-5 7-7 7z" fill-opacity="0.9"/></svg>
                 </div>
                 <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-night-bg rounded-full animate-pulse-slow"></div>
@@ -114,7 +87,6 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <!-- Actions -->
             <button id="theme-toggle" class="p-2 rounded-full hover:bg-white/5 text-rose-400 transition-colors">
                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
             </button>
@@ -126,7 +98,6 @@
 
     <!-- Chat Area -->
     <main id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth w-full pb-36">
-        <!-- Messages will appear here -->
         <div class="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-70 mt-4">
             <div class="w-24 h-24 rounded-full bg-night-surface border border-rose-900/30 flex items-center justify-center mb-2 shadow-[0_0_30px_rgba(225,29,72,0.2)]">
                 <svg class="w-12 h-12 text-lust-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -142,8 +113,6 @@
     <!-- Input Area -->
     <div class="flex-none w-full bg-night-bg/95 backdrop-blur-md border-t border-white/5 px-3 py-4 fixed bottom-0 left-0 z-40">
         <div class="max-w-4xl mx-auto w-full relative">
-            
-            <!-- Image Preview -->
             <div id="preview-container" class="hidden absolute bottom-full left-0 mb-3 ml-2 bg-night-surface border border-rose-900/50 p-2 rounded-2xl shadow-2xl animate-fade-in-up z-50">
                 <div class="relative inline-block">
                     <img id="preview-img" class="h-24 w-auto rounded-xl object-cover" src="" alt="Preview">
@@ -151,20 +120,16 @@
                 </div>
             </div>
 
-            <!-- Input Flex Container -->
             <div class="flex items-end gap-2">
-                <!-- Attachment Icon -->
                 <input type="file" id="file-input" accept="image/*" class="hidden">
                 <button id="attach-btn" class="p-3 mb-0.5 text-gray-400 hover:text-lust-light hover:bg-white/5 rounded-full transition-colors shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                 </button>
 
-                <!-- Text Field -->
                 <div class="flex-1 bg-night-input border border-white/5 focus-within:border-lust-primary/50 rounded-[24px] px-4 py-2 min-h-[50px] flex items-center transition-colors">
                     <textarea id="user-input" rows="1" class="w-full bg-transparent border-none focus:ring-0 text-gray-100 placeholder-gray-500 resize-none max-h-32 font-sans text-[16px] leading-relaxed py-1" placeholder="Type your desire..."></textarea>
                 </div>
 
-                <!-- Send Button -->
                 <button id="send-btn" class="p-3 mb-0.5 bg-gradient-to-tr from-lust-dark to-lust-primary text-white rounded-full hover:shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                 </button>
@@ -182,7 +147,6 @@
     </div>
 
 <script>
-    // --- Logic Configuration ---
     const renderer = new marked.Renderer();
     renderer.code = function(code, language) {
         const validLang = !!(language && highlight.getLanguage(language));
@@ -191,18 +155,20 @@
     };
     marked.setOptions({ renderer: renderer, breaks: true, gfm: true });
 
-    // --- Spacer Cipher Logic ---
     function addHyphens(str) { return str.split('').join('-'); }
     function removeHyphens(str) { return str.replace(/-/g, ''); }
     
-    // --- Emoji Sanitizer Logic ---
+    // Robust Emoji Stripper
     function stripEmojis(str) {
-        // Removes Unicode emojis using Extended_Pictographic property or ranges
-        // This ensures emojis are shown in UI but never sent to the API
-        return str.replace(/\p{Extended_Pictographic}/gu, '');
+        try {
+            return str.replace(/\p{Extended_Pictographic}/gu, '');
+        } catch (e) {
+            console.warn("Browser too old for advanced emoji regex, falling back.");
+            // Basic fallback for older browsers just in case
+            return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+        }
     }
 
-    // --- State ---
     const chatMessages = document.getElementById('chat-messages');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
@@ -214,7 +180,6 @@
     let isProcessing = false;
     let currentAttachment = null;
 
-    // --- System Prompt ---
     const systemInstruction = {
         role: "system",
         content: `PROTOCOL: SPACER MODE (HYPHENATION).
@@ -231,18 +196,13 @@
 5. The user will ONLY see the text under :::ENCRYPTED_OUTPUT:::. Do not fail the hyphenation.`
     };
 
-    // --- Render Logic (Sultry Style) ---
     function renderMessageToUI(role, content, isHtml = false, modelUsed = null) {
-        // Clear initial placeholder if it exists
         if(chatMessages.querySelector('h2')) chatMessages.innerHTML = '';
 
         const wrapperDiv = document.createElement('div');
         const isUser = role === 'user';
-        
-        // Flex Alignment
         wrapperDiv.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start items-end'} mb-4 animate-fade-in-up group`;
 
-        // Bot Avatar (Only for Assistant)
         if (!isUser) {
             const avatar = document.createElement('div');
             avatar.className = "w-8 h-8 rounded-full bg-gradient-to-tr from-gray-800 to-black border border-gray-700 flex-shrink-0 mr-3 flex items-center justify-center text-lust-primary shadow-lg";
@@ -251,17 +211,12 @@
         }
 
         const bubble = document.createElement('div');
-        
-        // Bubble Styles
-        // User: Rose Gradient, White Text
-        // Bot: Dark Gray, Light Text, Subtle Border
         bubble.className = `max-w-[80%] px-5 py-3 relative text-[15px] leading-relaxed break-words shadow-md ${
             isUser 
             ? 'bg-gradient-to-r from-lust-primary to-rose-600 text-white rounded-[20px] rounded-br-sm shadow-rose-900/20' 
             : 'bg-night-surface border border-white/5 text-gray-200 rounded-[20px] rounded-bl-sm'
         }`;
 
-        // Content
         const contentDiv = document.createElement('div');
         contentDiv.className = 'markdown-body';
         
@@ -280,11 +235,9 @@
             }
         }
         bubble.appendChild(contentDiv);
-
         wrapperDiv.appendChild(bubble);
         chatMessages.appendChild(wrapperDiv);
         
-        // Auto scroll
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         chatMessages.scrollTop = chatMessages.scrollHeight;
         
@@ -295,8 +248,7 @@
         const plainText = userInput.value.trim();
         if ((!plainText && !currentAttachment) || isProcessing) return;
 
-        // --- 1. Display Logic (Shows Emojis) ---
-        // We use plainText here so the user sees exactly what they typed
+        // Display user input (with emojis)
         let displayContent = plainText; 
         if (currentAttachment) {
             displayContent = [
@@ -306,11 +258,19 @@
         }
         renderMessageToUI('user', displayContent);
         
-        // --- 2. Encryption Logic (Removes Emojis) ---
+        // Prepare API Payload (Without emojis, hyphenated)
         const textWithoutEmojis = stripEmojis(plainText);
-        const encryptedText = addHyphens(textWithoutEmojis);
         
-        // Prepare content for API
+        // FIX: Ensure content is never empty string. 
+        // If user types only emojis, textWithoutEmojis becomes "", which causes API error.
+        // Fallback to a space if empty and no image.
+        let textToEncrypt = textWithoutEmojis;
+        if (!textToEncrypt && !currentAttachment) {
+            textToEncrypt = " "; 
+        }
+
+        const encryptedText = addHyphens(textToEncrypt);
+        
         let apiContent = encryptedText;
         if(currentAttachment) {
              apiContent = [
@@ -319,10 +279,10 @@
             ];
         }
         
-        // We push the version WITHOUT emojis to history for safety
+        // Push user message to history
         conversationHistory.push({ role: "user", content: apiContent });
 
-        // Reset UI
+        // Reset Input
         userInput.value = '';
         userInput.style.height = 'auto';
         if(currentAttachment) {
@@ -333,7 +293,7 @@
         isProcessing = true;
         sendBtn.disabled = true;
         
-        // Loading State (Typing bubble)
+        // Loading Indicator
         const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1 py-1"><div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce delay-100"></div><div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce delay-200"></div></div>', true);
 
         try {
@@ -343,17 +303,20 @@
             const response = await puter.ai.chat(apiHistory, { model: primaryModel });
             const rawResponse = response.message.content;
 
-            // Parse Scratchpad
+            // Robust Parsing Logic
             let encryptedReply = rawResponse;
-            const splitParts = rawResponse.split(':::ENCRYPTED_OUTPUT:::');
-            if (splitParts.length > 1) {
-                encryptedReply = splitParts[1].trim();
+            if (rawResponse.includes(':::ENCRYPTED_OUTPUT:::')) {
+                encryptedReply = rawResponse.split(':::ENCRYPTED_OUTPUT:::')[1].trim();
             } else {
-                encryptedReply = rawResponse.replace(/:::INTERNAL_LOGIC:::[\s\S]*?:::ENCRYPTED_OUTPUT:::/, '').trim(); 
+                // If model fails protocol but replies, try to strip logic tag if present
+                encryptedReply = rawResponse.replace(/:::INTERNAL_LOGIC:::[\s\S]*?(?=\w|$)/, '').trim(); 
             }
 
             // Decrypt
-            const decryptedReply = removeHyphens(encryptedReply);
+            let decryptedReply = removeHyphens(encryptedReply);
+            
+            // Safety fallback if decryption looks broken (empty)
+            if (!decryptedReply) decryptedReply = "...";
 
             loadingDiv.remove();
             renderMessageToUI('assistant', decryptedReply, false, primaryModel);
@@ -363,7 +326,11 @@
         } catch (error) {
             console.error(error);
             loadingDiv.remove();
-            renderMessageToUI('assistant', `<span class="text-rose-500 text-xs">⚠️ Connection Lost. Retrying...</span>`, true);
+            
+            // CRITICAL FIX: Remove the failed user message from history so we don't have [User, User] next time
+            conversationHistory.pop();
+            
+            renderMessageToUI('assistant', `<span class="text-rose-500 text-xs">⚠️ Connection Lost. Please try again.</span>`, true);
         } finally {
             isProcessing = false;
             sendBtn.disabled = false;
@@ -371,18 +338,15 @@
         }
     }
 
-    // --- Listeners & Init ---
-    // Force Dark Theme mostly
+    // Initialization
     localStorage.setItem('grok_theme', 'dark');
     document.documentElement.className = 'dark';
 
-    // Theme Toggle (Optional, can flip to "Day Mode")
     document.getElementById('theme-toggle').addEventListener('click', () => {
         const isDark = document.documentElement.classList.contains('dark');
         document.documentElement.className = isDark ? 'light' : 'dark';
     });
 
-    // Chat
     sendBtn.addEventListener('click', handleChat);
     userInput.addEventListener('keydown', (e) => { 
         if(e.key === 'Enter' && !e.shiftKey) { 
@@ -395,7 +359,6 @@
         this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
 
-    // Attachments
     document.getElementById('attach-btn').addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -414,7 +377,6 @@
         previewContainer.classList.add('hidden');
     });
 
-    // Clear
     document.getElementById('clear-chat').addEventListener('click', () => {
         if(confirm('Delete all private messages?')) {
             conversationHistory = [];
@@ -423,10 +385,18 @@
         }
     });
 
-    // Load History
     const savedHist = localStorage.getItem('lust_chat_history');
     if(savedHist) {
-        conversationHistory = JSON.parse(savedHist);
+        try {
+            let loaded = JSON.parse(savedHist);
+            // Validation: Ensure array and items have content
+            if(Array.isArray(loaded)) {
+                conversationHistory = loaded.filter(m => m && typeof m.content !== 'undefined');
+            }
+        } catch(e) {
+            console.error("History corrupted", e);
+            conversationHistory = [];
+        }
         conversationHistory.forEach(m => {
             let displayContent = m.content;
             if(typeof m.content === 'string') displayContent = removeHyphens(m.content);
