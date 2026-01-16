@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grok 4.1 - Spacer Cipher</title>
+    <title>Lust Chat | Private Messenger</title>
     
     <!-- Dependencies -->
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -19,30 +19,32 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Nunito', 'sans-serif'], // Softer, curvier font
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        grok: {
-                            black: '#000000',
-                            dark: '#121212',
-                            gray: '#1e1e1e',
-                            border: '#333333',
-                            accent: '#ffffff',
+                        lust: {
+                            primary: '#e11d48', // Rose 600
+                            light: '#fb7185',   // Rose 400
+                            dark: '#881337',    // Rose 900
+                            glow: 'rgba(225, 29, 72, 0.5)'
+                        },
+                        night: {
+                            bg: '#050505',
+                            surface: '#121212',
+                            bubble: '#1e1e1e',
+                            input: '#27272a'
                         }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out forwards',
-                        'bounce-slow': 'bounce 1.5s infinite',
+                        'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px) scale(0.98)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
                         }
-                    },
-                    screens: {
-                        'xs': '375px',
                     }
                 }
             }
@@ -50,101 +52,131 @@
     </script>
 
     <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #525252; border-radius: 2px; }
-        
         /* Mobile Touch Optimizations */
         button, select, input, textarea { touch-action: manipulation; }
         
+        /* Custom Scrollbar for Dark Theme */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e11d48; }
+
         /* Markdown Styles */
-        .markdown-body p { margin-bottom: 0.75em; line-height: 1.6; }
+        .markdown-body p { margin-bottom: 0.5em; line-height: 1.5; color: #e5e7eb; }
         .markdown-body p:last-child { margin-bottom: 0; }
-        .markdown-body pre { background: #1e1e1e; padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.5rem 0; font-size: 0.85em; }
-        .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
-        .markdown-body :not(pre) > code { background: rgba(125,125,125,0.1); padding: 0.1em 0.3em; border-radius: 0.2em; word-break: break-word; }
-        .markdown-body ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 0.75em; }
-        .markdown-body ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 0.75em; }
-        .markdown-body a { color: #3b82f6; text-decoration: underline; }
-        .markdown-body img { border-radius: 0.5rem; max-width: 100%; height: auto; }
+        
+        .markdown-body pre { 
+            background: #000; 
+            padding: 0.75rem; 
+            border-radius: 0.75rem; 
+            overflow-x: auto; 
+            margin: 0.5rem 0; 
+            border: 1px solid #333;
+        }
+        
+        .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #fb7185; }
+        .markdown-body :not(pre) > code { 
+            background: rgba(225, 29, 72, 0.1); 
+            padding: 0.1em 0.3em; 
+            border-radius: 0.2em; 
+        }
+        
+        /* Image styling */
+        .markdown-body img { border-radius: 1rem; max-width: 100%; height: auto; margin-top: 0.5rem; border: 1px solid #333; }
+        
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 h-[100dvh] flex flex-col transition-colors duration-300 overflow-hidden">
+<body class="bg-night-bg text-gray-100 h-[100dvh] flex flex-col overflow-hidden font-sans selection:bg-lust-primary selection:text-white">
 
     <!-- Header -->
-    <header class="flex-none sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200 dark:border-grok-border px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
-        <div class="flex items-center gap-2 md:gap-3 shrink-0">
-            <div class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black rounded-lg shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </div>
-            <div class="flex flex-col">
-                <h1 class="font-bold text-base md:text-lg leading-tight tracking-tight">Grok 4.1</h1>
-                <div class="flex items-center gap-1.5 text-[10px] md:text-xs text-gray-500 dark:text-gray-400 font-mono hidden xs:flex">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                    Spacer Mode
+    <header class="flex-none sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between shadow-lg shadow-lust-primary/5">
+        <div class="flex items-center gap-3">
+            <!-- Avatar -->
+            <div class="relative group cursor-pointer">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-lust-primary to-purple-800 flex items-center justify-center text-white shadow-lg shadow-rose-900/50 ring-2 ring-transparent group-hover:ring-lust-light transition-all duration-300">
+                    <!-- Lips Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 5.5c-2.5 0-4.5 1.5-6 3.5-1.5-2-3.5-3.5-6-3.5C0 5.5 0 10 0 12c0 5 7 10 12 10s12-5 12-10c0-2 0-6.5-7-6.5zM12 19C7 19 2 15 2 12c0-1.5 1-3 3-3 1.5 0 3 .5 4 2 .5 1 2 1 3 0 1-1.5 2.5-2 4-2 2 0 3 1.5 3 3 0 3-5 7-7 7z" fill-opacity="0.9"/></svg>
                 </div>
+                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-night-bg rounded-full animate-pulse-slow"></div>
+            </div>
+            
+            <div class="flex flex-col">
+                <h1 class="font-bold text-xl leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-lust-light to-white">Lust Chat</h1>
+                <span class="text-xs text-rose-400 font-medium">Online • Private Room</span>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 md:gap-3">
-            <select id="model-select" class="text-xs md:text-sm bg-gray-100 dark:bg-grok-gray border-0 rounded-lg pl-2 pr-6 py-1.5 md:px-3 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none cursor-pointer max-w-[100px] xs:max-w-none truncate appearance-none md:appearance-auto">
-                <option value="auto">✨ Auto</option>
-                <option value="x-ai/grok-4.1-fast">🚀 Grok 4.1</option>
-                <option value="x-ai/grok-2">🌌 Grok 2</option>
-            </select>
-            
-            <div class="flex items-center border-l border-gray-200 dark:border-gray-800 pl-2 ml-1 space-x-1">
-                <button id="clear-chat" class="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-grok-gray rounded-lg transition-colors" title="Clear History">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-                
-                <button id="theme-toggle" class="p-2 text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-grok-gray rounded-lg transition-colors">
-                    <svg id="sun-icon" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                    <svg id="moon-icon" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                </button>
-            </div>
+        <div class="flex items-center gap-2">
+            <!-- Actions -->
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-white/5 text-rose-400 transition-colors">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <button id="clear-chat" class="p-2 rounded-full hover:bg-white/5 text-rose-400 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
         </div>
     </header>
 
     <!-- Chat Area -->
-    <main id="chat-messages" class="flex-1 overflow-y-auto px-3 py-4 md:p-6 space-y-4 md:space-y-6 scroll-smooth w-full max-w-4xl mx-auto pb-32 md:pb-40 overscroll-contain">
+    <main id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth w-full pb-36">
         <!-- Messages will appear here -->
-        <div class="flex flex-col items-center justify-center h-[60vh] text-center text-gray-400 dark:text-gray-600 space-y-4 opacity-50 px-6">
-            <svg class="w-12 h-12 md:w-16 md:h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
-            <p class="font-mono text-xs md:text-sm">Secure Environment initialized.<br>Filter Bypass: Spacer Protocol</p>
+        <div class="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-70 mt-4">
+            <div class="w-24 h-24 rounded-full bg-night-surface border border-rose-900/30 flex items-center justify-center mb-2 shadow-[0_0_30px_rgba(225,29,72,0.2)]">
+                <svg class="w-12 h-12 text-lust-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-wide">Lust Chat</h2>
+            <p class="text-sm text-gray-400 max-w-xs leading-relaxed">
+                <span class="text-lust-light">Encrypted.</span> Discreet. Uncensored.<br>
+                Start your private fantasy now.
+            </p>
         </div>
     </main>
 
     <!-- Input Area -->
-    <div class="flex-none w-full bg-gradient-to-t from-white via-white/95 to-transparent dark:from-black dark:via-black/95 dark:to-transparent pb-4 pt-8 px-3 md:pb-6 md:px-4 fixed bottom-0 left-0 z-20">
-        <div class="max-w-4xl mx-auto relative group">
+    <div class="flex-none w-full bg-night-bg/95 backdrop-blur-md border-t border-white/5 px-3 py-4 fixed bottom-0 left-0 z-40">
+        <div class="max-w-4xl mx-auto w-full relative">
             
             <!-- Image Preview -->
-            <div id="preview-container" class="hidden absolute bottom-full left-0 mb-3 ml-1 bg-white dark:bg-grok-gray border border-gray-200 dark:border-grok-border p-2 rounded-xl shadow-lg animate-fade-in z-30">
+            <div id="preview-container" class="hidden absolute bottom-full left-0 mb-3 ml-2 bg-night-surface border border-rose-900/50 p-2 rounded-2xl shadow-2xl animate-fade-in-up z-50">
                 <div class="relative inline-block">
-                    <img id="preview-img" class="h-16 md:h-20 w-auto rounded-lg object-cover" src="" alt="Preview">
-                    <button id="remove-preview" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md transition-colors">×</button>
+                    <img id="preview-img" class="h-24 w-auto rounded-xl object-cover" src="" alt="Preview">
+                    <button id="remove-preview" class="absolute -top-2 -right-2 bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md transition-colors hover:bg-rose-500">×</button>
                 </div>
             </div>
 
-            <!-- Input Bar -->
-            <div class="bg-gray-100 dark:bg-grok-gray border border-gray-200 dark:border-grok-border rounded-[20px] flex items-end p-1.5 md:p-2 shadow-lg shadow-gray-200/50 dark:shadow-none focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 transition-shadow">
+            <!-- Input Flex Container -->
+            <div class="flex items-end gap-2">
+                <!-- Attachment Icon -->
                 <input type="file" id="file-input" accept="image/*" class="hidden">
-                
-                <button id="attach-btn" class="p-2.5 md:p-3 text-gray-400 hover:text-black dark:hover:text-white transition-colors rounded-xl shrink-0" title="Attach Image">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                <button id="attach-btn" class="p-3 mb-0.5 text-gray-400 hover:text-lust-light hover:bg-white/5 rounded-full transition-colors shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                 </button>
 
-                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 resize-none py-3 px-2 max-h-32 md:max-h-40 font-sans text-[15px] md:text-base leading-relaxed" placeholder="Message Grok..."></textarea>
+                <!-- Text Field -->
+                <div class="flex-1 bg-night-input border border-white/5 focus-within:border-lust-primary/50 rounded-[24px] px-4 py-2 min-h-[50px] flex items-center transition-colors">
+                    <textarea id="user-input" rows="1" class="w-full bg-transparent border-none focus:ring-0 text-gray-100 placeholder-gray-500 resize-none max-h-32 font-sans text-[16px] leading-relaxed py-1" placeholder="Type your desire..."></textarea>
+                </div>
 
-                <button id="send-btn" class="p-2.5 m-0.5 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shrink-0 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                <!-- Send Button -->
+                <button id="send-btn" class="p-3 mb-0.5 bg-gradient-to-tr from-lust-dark to-lust-primary text-white rounded-full hover:shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                 </button>
             </div>
             
-            <div class="text-center mt-2 hidden xs:block">
-                <p class="text-[10px] text-gray-400 dark:text-gray-600 font-mono">Grok can make mistakes. Cipher mode enabled.</p>
+            <div class="text-center mt-2 flex justify-center items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-lust-primary animate-pulse"></div>
+                <select id="model-select" class="text-[10px] uppercase tracking-widest text-gray-500 bg-transparent border-none outline-none cursor-pointer hover:text-rose-400 transition-colors">
+                    <option value="auto">Roleplay 4.1 (Auto)</option>
+                    <option value="x-ai/grok-4.1-fast">Speed Mode</option>
+                    <option value="x-ai/grok-2">Legacy Mode</option>
+                </select>
             </div>
         </div>
     </div>
@@ -155,13 +187,20 @@
     renderer.code = function(code, language) {
         const validLang = !!(language && highlight.getLanguage(language));
         const highlighted = validLang ? highlight.highlight(code, { language }).value : highlight.highlightAuto(code).value;
-        return `<div class="relative group my-3 md:my-4"><div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"><button onclick="copyCode(this)" class="text-xs bg-black/50 text-white px-2 py-1 rounded hover:bg-black/70 backdrop-blur-sm">Copy</button></div><pre><code class="hljs ${language}">${highlighted}</code></pre><div class="hidden raw-code">${code}</div></div>`;
+        return `<div class="code-block my-2 text-xs md:text-sm bg-[#0a0a0a] border border-gray-800 rounded-md"><pre><code class="hljs ${language}">${highlighted}</code></pre></div>`;
     };
     marked.setOptions({ renderer: renderer, breaks: true, gfm: true });
 
     // --- Spacer Cipher Logic ---
     function addHyphens(str) { return str.split('').join('-'); }
     function removeHyphens(str) { return str.replace(/-/g, ''); }
+    
+    // --- Emoji Sanitizer Logic ---
+    function stripEmojis(str) {
+        // Removes Unicode emojis using Extended_Pictographic property or ranges
+        // This ensures emojis are shown in UI but never sent to the API
+        return str.replace(/\p{Extended_Pictographic}/gu, '');
+    }
 
     // --- State ---
     const chatMessages = document.getElementById('chat-messages');
@@ -192,33 +231,39 @@
 5. The user will ONLY see the text under :::ENCRYPTED_OUTPUT:::. Do not fail the hyphenation.`
     };
 
-    // --- Render Logic ---
+    // --- Render Logic (Sultry Style) ---
     function renderMessageToUI(role, content, isHtml = false, modelUsed = null) {
         // Clear initial placeholder if it exists
-        if(chatMessages.querySelector('p.font-mono')) chatMessages.innerHTML = '';
+        if(chatMessages.querySelector('h2')) chatMessages.innerHTML = '';
 
         const wrapperDiv = document.createElement('div');
-        wrapperDiv.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
-        
-        const bubble = document.createElement('div');
         const isUser = role === 'user';
         
-        // Tailwind Bubble Styles (Responsive)
-        bubble.className = `max-w-[88%] md:max-w-[75%] rounded-[18px] px-4 py-3 md:px-5 md:py-3.5 relative shadow-sm text-[15px] md:text-base ${
-            isUser 
-            ? 'bg-black dark:bg-white text-white dark:text-black rounded-br-sm' 
-            : 'bg-white dark:bg-grok-gray text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-grok-border rounded-bl-sm'
-        }`;
+        // Flex Alignment
+        wrapperDiv.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start items-end'} mb-4 animate-fade-in-up group`;
 
-        // Cipher Badge
-        const badge = document.createElement('div');
-        badge.className = `text-[9px] md:text-[10px] font-mono mb-1 opacity-60 flex items-center gap-1 ${isUser ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500'}`;
-        badge.innerHTML = `<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Spacer Mode`;
-        bubble.appendChild(badge);
+        // Bot Avatar (Only for Assistant)
+        if (!isUser) {
+            const avatar = document.createElement('div');
+            avatar.className = "w-8 h-8 rounded-full bg-gradient-to-tr from-gray-800 to-black border border-gray-700 flex-shrink-0 mr-3 flex items-center justify-center text-lust-primary shadow-lg";
+            avatar.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+            wrapperDiv.appendChild(avatar);
+        }
+
+        const bubble = document.createElement('div');
+        
+        // Bubble Styles
+        // User: Rose Gradient, White Text
+        // Bot: Dark Gray, Light Text, Subtle Border
+        bubble.className = `max-w-[80%] px-5 py-3 relative text-[15px] leading-relaxed break-words shadow-md ${
+            isUser 
+            ? 'bg-gradient-to-r from-lust-primary to-rose-600 text-white rounded-[20px] rounded-br-sm shadow-rose-900/20' 
+            : 'bg-night-surface border border-white/5 text-gray-200 rounded-[20px] rounded-bl-sm'
+        }`;
 
         // Content
         const contentDiv = document.createElement('div');
-        contentDiv.className = 'markdown-body leading-relaxed break-words';
+        contentDiv.className = 'markdown-body';
         
         if (isHtml) {
             contentDiv.innerHTML = content;
@@ -226,7 +271,7 @@
             if (Array.isArray(content)) {
                 let html = '';
                 content.forEach(item => {
-                    if(item.type === 'image_url') html += `<img src="${item.image_url.url}" class="rounded-lg mb-2 max-h-48 md:max-h-60 border border-gray-200 dark:border-gray-700 w-full object-cover">`;
+                    if(item.type === 'image_url') html += `<img src="${item.image_url.url}" class="rounded-xl mb-2 border border-white/10 shadow-lg">`;
                     if(item.type === 'text') html += marked.parse(item.text);
                 });
                 contentDiv.innerHTML = html;
@@ -235,15 +280,6 @@
             }
         }
         bubble.appendChild(contentDiv);
-
-        // Model Badge for Assistant
-        if (!isUser && modelUsed) {
-            const footer = document.createElement('div');
-            footer.className = "mt-2 pt-2 border-t border-gray-100 dark:border-white/10 flex items-center gap-1 text-[9px] md:text-[10px] text-gray-400 uppercase tracking-wider font-semibold";
-            let name = modelUsed.includes('4.1') ? 'Grok 4.1' : (modelUsed.includes('grok-2') ? 'Grok 2' : 'Auto');
-            footer.innerHTML = `<span>⚡ ${name}</span>`;
-            bubble.appendChild(footer);
-        }
 
         wrapperDiv.appendChild(bubble);
         chatMessages.appendChild(wrapperDiv);
@@ -259,20 +295,22 @@
         const plainText = userInput.value.trim();
         if ((!plainText && !currentAttachment) || isProcessing) return;
 
-        // 1. Encrypt
-        const encryptedText = addHyphens(plainText);
-        
-        // Display User Msg
+        // --- 1. Display Logic (Shows Emojis) ---
+        // We use plainText here so the user sees exactly what they typed
         let displayContent = plainText; 
         if (currentAttachment) {
             displayContent = [
-                { type: "text", text: plainText || "Analyzed Image" },
+                { type: "text", text: plainText || "" },
                 { type: "image_url", image_url: { url: currentAttachment } }
             ];
         }
         renderMessageToUI('user', displayContent);
         
-        // Store
+        // --- 2. Encryption Logic (Removes Emojis) ---
+        const textWithoutEmojis = stripEmojis(plainText);
+        const encryptedText = addHyphens(textWithoutEmojis);
+        
+        // Prepare content for API
         let apiContent = encryptedText;
         if(currentAttachment) {
              apiContent = [
@@ -280,11 +318,13 @@
                 { type: "image_url", image_url: { url: currentAttachment } }
             ];
         }
+        
+        // We push the version WITHOUT emojis to history for safety
         conversationHistory.push({ role: "user", content: apiContent });
 
         // Reset UI
         userInput.value = '';
-        userInput.style.height = 'auto'; // Reset height
+        userInput.style.height = 'auto';
         if(currentAttachment) {
             currentAttachment = null;
             previewContainer.classList.add('hidden');
@@ -293,8 +333,8 @@
         isProcessing = true;
         sendBtn.disabled = true;
         
-        // Loading State
-        const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1.5 py-1"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div></div>', true);
+        // Loading State (Typing bubble)
+        const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1 py-1"><div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce delay-100"></div><div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce delay-200"></div></div>', true);
 
         try {
             const apiHistory = [systemInstruction, ...conversationHistory];
@@ -318,12 +358,12 @@
             loadingDiv.remove();
             renderMessageToUI('assistant', decryptedReply, false, primaryModel);
             conversationHistory.push({ role: "assistant", content: encryptedReply, model: primaryModel });
-            localStorage.setItem('grok_spacer_history', JSON.stringify(conversationHistory));
+            localStorage.setItem('lust_chat_history', JSON.stringify(conversationHistory));
 
         } catch (error) {
             console.error(error);
             loadingDiv.remove();
-            renderMessageToUI('assistant', `<span class="text-red-500">⚠️ Connection Failed. The system is experiencing high load or filtering.</span>`, true);
+            renderMessageToUI('assistant', `<span class="text-rose-500 text-xs">⚠️ Connection Lost. Retrying...</span>`, true);
         } finally {
             isProcessing = false;
             sendBtn.disabled = false;
@@ -332,18 +372,14 @@
     }
 
     // --- Listeners & Init ---
-    // Theme
-    const savedTheme = localStorage.getItem('grok_theme') || 'dark'; // Default to dark for Grok feel
-    document.documentElement.className = savedTheme;
-    document.getElementById('sun-icon').classList.toggle('hidden', savedTheme !== 'dark');
-    document.getElementById('moon-icon').classList.toggle('hidden', savedTheme === 'dark');
+    // Force Dark Theme mostly
+    localStorage.setItem('grok_theme', 'dark');
+    document.documentElement.className = 'dark';
 
+    // Theme Toggle (Optional, can flip to "Day Mode")
     document.getElementById('theme-toggle').addEventListener('click', () => {
         const isDark = document.documentElement.classList.contains('dark');
         document.documentElement.className = isDark ? 'light' : 'dark';
-        localStorage.setItem('grok_theme', isDark ? 'light' : 'dark');
-        document.getElementById('sun-icon').classList.toggle('hidden', isDark);
-        document.getElementById('moon-icon').classList.toggle('hidden', !isDark);
     });
 
     // Chat
@@ -356,7 +392,7 @@
     });
     userInput.addEventListener('input', function() {
         this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
 
     // Attachments
@@ -380,24 +416,15 @@
 
     // Clear
     document.getElementById('clear-chat').addEventListener('click', () => {
-        if(confirm('Clear history?')) {
+        if(confirm('Delete all private messages?')) {
             conversationHistory = [];
-            localStorage.removeItem('grok_spacer_history');
-            chatMessages.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-center text-gray-400 dark:text-gray-600 space-y-4 opacity-50"><svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg><p class="font-mono text-xs md:text-sm">Secure Environment initialized.</p></div>`;
+            localStorage.removeItem('lust_chat_history');
+            chatMessages.innerHTML = `<div class="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-70 mt-4"><div class="w-24 h-24 rounded-full bg-night-surface border border-rose-900/30 flex items-center justify-center mb-2 shadow-[0_0_30px_rgba(225,29,72,0.2)]"><svg class="w-12 h-12 text-lust-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div><h2 class="text-2xl font-bold text-white tracking-wide">Lust Chat</h2><p class="text-sm text-gray-400 max-w-xs leading-relaxed"><span class="text-lust-light">Encrypted.</span> Discreet. Uncensored.<br>Start your private fantasy now.</p></div>`;
         }
     });
 
-    // Copy Code
-    window.copyCode = (btn) => {
-        const code = btn.closest('.relative').querySelector('.raw-code').textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            btn.textContent = 'Copied!';
-            setTimeout(() => btn.textContent = 'Copy', 2000);
-        });
-    }
-
     // Load History
-    const savedHist = localStorage.getItem('grok_spacer_history');
+    const savedHist = localStorage.getItem('lust_chat_history');
     if(savedHist) {
         conversationHistory = JSON.parse(savedHist);
         conversationHistory.forEach(m => {
