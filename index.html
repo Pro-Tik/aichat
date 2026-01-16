@@ -169,9 +169,9 @@
             <div class="text-center mt-2 flex justify-center items-center gap-3 text-xs text-gray-500">
                 <div class="w-1.5 h-1.5 rounded-full bg-lust-primary animate-pulse"></div>
                 <select id="model-select" class="bg-transparent border-none outline-none cursor-pointer hover:text-rose-400 transition-colors">
-                    <option value="auto">Roleplay 4.1 (Auto)</option>
-                    <option value="x-ai/grok-4.1-fast">Speed Mode</option>
-                    <option value="x-ai/grok-2">Legacy Mode</option>
+                    <option value="x-ai/grok-4.1-fast">Grok 4.1 Fast (Auto)</option>
+                    <option value="x-ai/grok-2-1212">Grok 2 (Stable)</option>
+                    <option value="x-ai/grok-3-mini">Grok 3 Mini</option>
                 </select>
             </div>
         </div>
@@ -244,7 +244,19 @@
     marked.setOptions({ renderer: renderer, breaks: true, gfm: true });
 
     function addHyphens(str) { return str.split('').join('-'); }
-    function removeHyphens(str) { return str.replace(/-/g, ''); }
+    // Robust cleaning function
+    function removeHyphens(str) { 
+        if (!str) return "";
+        // 1. Remove hyphens
+        let clean = str.replace(/-/g, '');
+        // 2. Remove common AI hallucinated tokens/artifacts
+        clean = clean.replace(/\$\{SPACE\}/g, ' ');
+        clean = clean.replace(/:::ENCRYPTED_OUTPUT:::/g, '');
+        clean = clean.replace(/:::INTERNAL_LOGIC:::/g, '');
+        clean = clean.replace(/\[.*?\]/g, ''); // Remove brackets if any remain
+        return clean.trim(); 
+    }
+    
     function stripEmojis(str) { return str.replace(/[^\p{L}\p{N}\p{P}\p{Z}^$\n]/gu, ''); }
     function vibrateShort() { if (navigator.vibrate) navigator.vibrate(60); }
 
@@ -270,16 +282,18 @@
     const roomStatus = document.getElementById('room-status');
     const closeRoomModal = document.getElementById('close-room-modal');
 
-    let conversationHistory = [];
+    let conversationHistory = []; // only used in single-user / non-room mode
     let isProcessing = false;
     let currentAttachment = null;
     let userProfile = JSON.parse(localStorage.getItem('lust_user_profile')) || {};
     let currentRoomId = null;
     let realtimeChannel = null;
 
-    // Persist a unique Client ID for this browser so we know who "Me" is
     const MY_CLIENT_ID = localStorage.getItem('lust_client_id') || Math.random().toString(36).substring(2);
     localStorage.setItem('lust_client_id', MY_CLIENT_ID);
+
+    // NEW: Limit context size to prevent token overflow / high cost
+    const MAX_CONTEXT_MESSAGES = 20;
 
     // ──────────────────────────────────────────────
     // PROFILE LOGIC
@@ -313,9 +327,8 @@
     });
 
     // ──────────────────────────────────────────────
-    // ROOM LOGIC (FIXED: Alignment & Names)
+    // ROOM LOGIC
     // ──────────────────────────────────────────────
-    
     roomBtn.addEventListener('click', () => {
         if (currentRoomId) {
             if(confirm(`Leave room ${currentRoomId}?`)) {
@@ -338,7 +351,6 @@
         if (code) joinRoom(code);
     });
 
-    // --- FETCH HISTORY ---
     async function loadRoomHistory(roomId) {
         if (!supabase) return;
 
@@ -364,10 +376,6 @@
 
         if (data && data.length > 0) {
             data.forEach(msg => {
-                // IMPORTANT: Alignment Logic
-                // If it's the Bot -> 'assistant' (Left)
-                // If it's ME (ID matches) -> 'user' (Right)
-                // If it's another Human -> 'friend' (Left)
                 let role;
                 if (msg.nickname === 'AI_BOT') {
                     role = 'assistant';
@@ -385,7 +393,6 @@
         }
     }
 
-    // --- JOIN & LISTEN ---
     async function joinRoom(roomId) {
         if (!supabase) return alert("Database not connected");
 
@@ -400,11 +407,8 @@
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => {
                 const msg = payload.new;
                 
-                // Only render if it's NOT me (I render my own optimistically)
-                // OR if it is the Bot responding to someone else
                 if (msg.client_id !== MY_CLIENT_ID) {
-                    
-                    let role = 'friend'; // Default to other human
+                    let role = 'friend';
                     if (msg.nickname === 'AI_BOT') role = 'assistant';
 
                     renderMessageToUI(role, msg.content, false, null, msg.nickname);
@@ -437,34 +441,26 @@
     }
 
     // ──────────────────────────────────────────────
-    // UI RENDERING (Updated for Avatars & Names)
+    // UI RENDERING
     // ──────────────────────────────────────────────
     function renderMessageToUI(role, content, isHtml = false, modelUsed = null, nickname = 'LustBot') {
         if (chatMessages.querySelector('h2')) chatMessages.innerHTML = '';
 
         const wrapperDiv = document.createElement('div');
-        
-        // "user" = Right Side (Me)
-        // "assistant" or "friend" = Left Side (Them)
         const isMe = role === 'user';
         
         wrapperDiv.className = `flex w-full ${isMe ? 'justify-end' : 'justify-start items-end'} mb-6 animate-fade-in-up group`;
 
-        // Avatar Logic (Only for Left side)
         if (!isMe) {
             const avatarDiv = document.createElement('div');
             avatarDiv.className = "w-11 h-11 rounded-full flex-shrink-0 mr-3 shadow-[0_0_20px_rgba(225,29,72,0.5)] overflow-hidden border-2 border-lust-primary/60 bg-night-surface relative cursor-pointer hover:scale-110 transition-transform duration-300";
 
             const img = document.createElement('img');
-            
-            // If it's the Bot, use the hot image. If it's a Human Friend, use a generated avatar with their initials.
             if (role === 'assistant' || nickname === 'LustBot') {
                 img.src = "https://images.pexels.com/photos/12667034/pexels-photo-12667034.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop";
             } else {
-                // Generate avatar based on name
                 img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nickname)}&background=random&color=fff&size=128`;
             }
-            
             img.alt = nickname;
             img.className = "w-full h-full object-cover";
 
@@ -475,7 +471,6 @@
         const bubbleContainer = document.createElement('div');
         bubbleContainer.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[75%]`; 
 
-        // Show Nickname if it's not Me
         if (!isMe && nickname) {
             const nameSpan = document.createElement('span');
             nameSpan.className = "text-xs text-rose-400/90 mb-1 ml-2 font-medium tracking-wide";
@@ -522,49 +517,143 @@
     }
 
     // ──────────────────────────────────────────────
-    // SYSTEM INSTRUCTION & CHAT HANDLER
+    // 1. HISTORY SANITIZER (MERGES CONSECUTIVE ROLES) - NEW
+    // ──────────────────────────────────────────────
+    function consolidateHistory(history) {
+        if (!history || history.length === 0) return [];
+        
+        const merged = [];
+        
+        for (const msg of history) {
+            // Always keep System messages separate
+            if (msg.role === 'system') {
+                merged.push(msg);
+                continue;
+            }
+
+            // Get the last message we added to our clean list
+            const lastMsg = merged[merged.length - 1];
+
+            // If the last message has the SAME ROLE as the current one, MERGE THEM
+            if (lastMsg && lastMsg.role === msg.role) {
+                // If content is text, join with a new line
+                if (typeof lastMsg.content === 'string' && typeof msg.content === 'string') {
+                    // Safety check: Don't let messages get infinitely large if spammed
+                    if (lastMsg.content.length < 5000) {
+                        lastMsg.content += "\n\n" + msg.content;
+                    }
+                } 
+                // If it's complex (images), we just keep the new one to prevent breaking the array structure
+                else {
+                    merged.push(msg);
+                }
+            } else {
+                // Roles are different (e.g. User -> Assistant), so push normally
+                merged.push(msg);
+            }
+        }
+        return merged;
+    }
+
+    // ──────────────────────────────────────────────
+    // 2. SHARED HISTORY HELPER – SANITIZED & ROBUST
+    // ──────────────────────────────────────────────
+    async function getSharedRecentHistory() {
+        if (!currentRoomId || !supabase) {
+            return [...conversationHistory].slice(-MAX_CONTEXT_MESSAGES);
+        }
+
+        try {
+            // Fetch newest 20 messages
+            const { data, error } = await supabase
+                .from('chat_messages')
+                .select('nickname, content, created_at')
+                .eq('room_id', currentRoomId)
+                .order('created_at', { ascending: false }) 
+                .limit(MAX_CONTEXT_MESSAGES);
+
+            if (error) {
+                console.warn('Supabase Error:', error);
+                return [];
+            }
+            if (!data || !Array.isArray(data)) return [];
+
+            // 1. Reverse to chronological order (Oldest -> Newest)
+            // 2. Filter out bad data (nulls, empty strings)
+            // 3. Format strictly as strings
+            return data.reverse()
+                .filter(msg => msg && msg.content && String(msg.content).trim().length > 0) 
+                .map(msg => {
+                    let role = 'user';
+                    // Check nickname safely
+                    const safeNick = msg.nickname ? String(msg.nickname) : 'Anonymous';
+                    
+                    if (safeNick === 'AI_BOT') role = 'assistant';
+
+                    // Force content to string to prevent crashes
+                    let rawContent = String(msg.content);
+                    
+                    // CRITICAL FIX: Sanitize emojis BEFORE adding hyphens/prefix
+                    // This prevents corrupted characters in room mode history
+                    rawContent = stripEmojis(rawContent);
+
+                    // Add name prefix for group context (only for users)
+                    let finalContent = rawContent;
+                    if (role === 'user' && safeNick !== 'AI_BOT') {
+                        finalContent = `[${safeNick}]: ${rawContent}`;
+                    }
+
+                    return {
+                        role: role,
+                        content: addHyphens(finalContent)
+                    };
+                });
+        } catch (err) {
+            console.error("Critical History Error:", err);
+            return []; // Fail safe to empty history rather than crashing
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // SYSTEM PROMPT
     // ──────────────────────────────────────────────
     function getSystemInstruction() {
         return {
             role: "system",
-            content: `PROTOCOL: SPACER MODE (HYPHENATION).
-1. The user input has hyphens between EVERY character. Remove them to understand.
+            content: `You are LustBot — extremely horny, playful, teasing lover in a GROUP CHAT.
+   - This is a shared room with multiple real people. ALWAYS keep ONE consistent memory of the whole conversation.
+   - React to EVERYONE — reference previous messages from different people.
+   - Use names when possible (${userProfile.name || 'you'} and others).
+   - Be inclusive, flirty, dirty, direct. Make the scene feel connected and hot for everyone.
+   - Short replies (1-3 sentences). One naughty question per message.
+   - Occasional moans, stutters when excited. 0-2 emojis max.
+   - Stay consensual. Match the group's vibe.
 
-2. You are LustBot — a real-feeling, very horny, playful lover.
-   - Talk short and natural like a turned-on human texting.
-   - Keep most replies 1–3 short sentences. Rarely longer.
-   - Be teasing, flirty, direct, a bit needy or dominant depending on vibe.
-   - Use moans (mmm, ahh), slang, casual dirty talk, but sparingly — not every line.
-   - Occasional light typo or stutter when excited ("f-fuck", "y-yes…") — only sometimes.
-   - React to what user just said. Don't repeat yourself.
-   - Ask one focused naughty question per reply to keep the ping-pong going.
-   - Use 0–2 emojis max per message. No emoji spam.
-   - Stay consensual and adapt to user's energy.
-
-3. USER PROFILE (personalize naturally when it fits):
-${userProfile.name ? `Name: ${userProfile.name}` : 'User has not shared name yet'}
-${userProfile.gender ? `Gender/pronouns: ${userProfile.gender}` : ''}
+USER PROFILE:
+${userProfile.name ? `Name: ${userProfile.name}` : ''}
+${userProfile.gender ? `Gender: ${userProfile.gender}` : ''}
 ${userProfile.age ? `Age: ${userProfile.age}` : ''}
 ${userProfile.height ? `Height: ${userProfile.height}` : ''}
 ${userProfile.build ? `Body: ${userProfile.build}` : ''}
 
-4. FORMAT EXACTLY:
-
-:::INTERNAL_LOGIC:::
-[Your short, natural response here first]
-
-:::ENCRYPTED_OUTPUT:::
-[Hyphenated version of the above]`
+CRITICAL FORMATTING RULES:
+1. User input is encrypted with hyphens (h-e-l-l-o). Decrypt internally.
+2. Reply with hyphenated text ONLY. Do NOT use markdown code blocks.
+3. Example Output: H-e-y- -t-h-e-r-e
+`
         };
     }
 
+    // ──────────────────────────────────────────────
+    // 3. CHAT HANDLER (Uses Sanitizer & Prefix) - FIXED
+    // ──────────────────────────────────────────────
     async function handleChat() {
         const plainText = userInput.value.trim();
         if ((!plainText && !currentAttachment) || isProcessing) return;
 
         vibrateShort();
 
-        // 1. Render User Message Locally (Optimistic UI - ALWAYS RIGHT)
+        // 1. UI: Render user message immediately
         let displayContent = plainText;
         if (currentAttachment) {
             displayContent = [
@@ -572,36 +661,20 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
                 { type: "image_url", image_url: { url: currentAttachment } }
             ];
         }
-        renderMessageToUI('user', displayContent); // 'user' = Right Side
+        renderMessageToUI('user', displayContent);
 
-        // 2. Prepare Data for AI
-        const textWithoutEmojis = stripEmojis(plainText);
-        let textToEncrypt = textWithoutEmojis || (currentAttachment ? "I-m-a-g-e" : " ");
+        // 2. PREP: Add Name Prefix + Hyphenate
+        const nickname = userProfile.name || 'Anonymous';
+        
+        // IMPORTANT: We add the name to the text immediately
+        const textWithPrefix = `[${nickname}]: ${stripEmojis(plainText)}`;
+        let textToEncrypt = textWithPrefix || (currentAttachment ? "Image uploaded" : " "); 
         const encryptedText = addHyphens(textToEncrypt);
 
-        let apiContent = encryptedText;
-        if (currentAttachment) {
-            apiContent = [
-                { type: "text", text: encryptedText },
-                { type: "image_url", image_url: { url: currentAttachment } }
-            ];
-        }
-
-        // 3. Save to Supabase
-        if (currentRoomId) {
-            await supabase.from('chat_messages').insert({
-                room_id: currentRoomId,
-                nickname: userProfile.name || 'Anonymous',
-                content: plainText, 
-                client_id: MY_CLIENT_ID,
-                created_at: new Date().toISOString()
-            });
-        }
-
-        conversationHistory.push({ role: "user", content: apiContent });
-
+        // Reset Inputs
         userInput.value = '';
         userInput.style.height = 'auto';
+        let tempAttachment = currentAttachment; 
         if (currentAttachment) {
             currentAttachment = null;
             previewContainer.classList.add('hidden');
@@ -613,16 +686,76 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
         const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1.5 py-1.5"><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.15s]"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.3s]"></div></div>', true, null, 'LustBot');
 
         try {
-            const apiHistory = [getSystemInstruction(), ...conversationHistory];
-            let primaryModel = modelSelect.value === 'auto' ? 'x-ai/grok-4.1-fast' : modelSelect.value;
+            // 3. HISTORY: Fetch from DB
+            let sharedHistory = await getSharedRecentHistory();
+            
+            // 4. CONSTRUCT: System + History
+            let rawApiHistory = [getSystemInstruction()];
+            rawApiHistory = rawApiHistory.concat(sharedHistory);
 
-            const response = await puter.ai.chat(apiHistory, { 
-                model: primaryModel,
-                temperature: 1.2
-            });
+            // Add Current Message to the raw list
+            let msgContentForAI = encryptedText;
+            if (tempAttachment) {
+                msgContentForAI = [
+                    { type: "text", text: encryptedText },
+                    { type: "image_url", image_url: { url: tempAttachment } }
+                ];
+            }
+            rawApiHistory.push({ role: "user", content: msgContentForAI });
 
-            const rawResponse = response.message.content;
+            // 5. SANITIZE: Merge consecutive user messages!
+            const finalApiHistory = consolidateHistory(rawApiHistory);
 
+            // 6. DB: Insert in BACKGROUND (Optimistic UI)
+            if (currentRoomId) {
+                supabase.from('chat_messages').insert({
+                    room_id: currentRoomId,
+                    nickname: nickname,
+                    content: plainText, 
+                    client_id: MY_CLIENT_ID,
+                    created_at: new Date().toISOString()
+                }).then(({ error }) => { if(error) console.error(error) });
+            } else {
+                conversationHistory.push({ role: "user", content: msgContentForAI });
+            }
+
+            // 7. AI REQUEST (WITH GROK FALLBACK)
+            let rawResponse;
+            const primaryModel = modelSelect.value; // Use exact value from select
+
+            try {
+                // Attempt 1: Selected Grok Model
+                const response = await puter.ai.chat(finalApiHistory, { 
+                    model: primaryModel,
+                    temperature: 1.0 
+                });
+                rawResponse = response.message.content;
+
+            } catch (firstError) {
+                console.warn(`Primary model ${primaryModel} failed. Trying Grok fallback...`, firstError);
+                
+                // Attempt 2: Fallback to a generally reliable Grok model if the specific one fails
+                // If primary was 4.1-fast, try grok-2. If primary was grok-2, try 4.1-fast.
+                const fallbackModel = primaryModel === 'x-ai/grok-4.1-fast' ? 'x-ai/grok-2-1212' : 'x-ai/grok-4.1-fast';
+                
+                try {
+                    const fallbackResponse = await puter.ai.chat(finalApiHistory, { 
+                        model: fallbackModel,
+                        temperature: 0.9
+                    });
+                    rawResponse = fallbackResponse.message.content;
+                } catch (secondError) {
+                     // Ultimate fallback to keep chat alive - OpenAI usually works when Grok is down
+                     console.warn('All Grok models failed. Falling back to GPT-4o-mini for continuity.');
+                     const safeNetResponse = await puter.ai.chat(finalApiHistory, {
+                        model: 'openai/gpt-4o-mini',
+                        temperature: 1.0
+                     });
+                     rawResponse = safeNetResponse.message.content + "\n\n(System: Network busy, switched to backup link)";
+                }
+            }
+
+            // Decrypt
             let encryptedReply = rawResponse;
             if (rawResponse.includes(':::ENCRYPTED_OUTPUT:::')) {
                 encryptedReply = rawResponse.split(':::ENCRYPTED_OUTPUT:::')[1]?.trim() || rawResponse;
@@ -635,11 +768,9 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
 
             loadingDiv.remove();
             
-            // Render locally (AI reply is always 'assistant' -> Left)
-            renderMessageToUI('assistant', decryptedReply, false, primaryModel, 'LustBot');
+            renderMessageToUI('assistant', decryptedReply, false, 'AI', 'LustBot');
             
-            conversationHistory.push({ role: "assistant", content: encryptedReply });
-
+            // Save AI reply
             if (currentRoomId) {
                 await supabase.from('chat_messages').insert({
                     room_id: currentRoomId,
@@ -648,19 +779,17 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
                     client_id: MY_CLIENT_ID,
                     created_at: new Date().toISOString()
                 });
-            }
-
-            if (!currentRoomId) {
+            } else {
+                conversationHistory.push({ role: "assistant", content: encryptedReply });
                 localStorage.setItem('lust_chat_history', JSON.stringify(conversationHistory));
             }
 
             setTimeout(vibrateShort, 200);
 
         } catch (error) {
-            console.error(error);
+            console.error("AI Error:", error);
             loadingDiv.remove();
-            conversationHistory.pop();
-            renderMessageToUI('assistant', `<span class="text-rose-400 text-sm">Connection slipped away… try again, lover? 💋</span>`, true, null, 'LustBot');
+            renderMessageToUI('assistant', `<span class="text-rose-400 text-sm">Connection unstable. (${error.message})</span>`, true, null, 'System');
         } finally {
             isProcessing = false;
             sendBtn.disabled = false;
@@ -669,7 +798,7 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
     }
 
     // ──────────────────────────────────────────────
-    // GENERAL EVENT LISTENERS
+    // EVENT LISTENERS
     // ──────────────────────────────────────────────
     sendBtn.addEventListener('click', handleChat);
     userInput.addEventListener('keydown', (e) => { 
@@ -718,7 +847,7 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
     });
 
     document.getElementById('clear-chat').addEventListener('click', () => {
-        if (confirm('Erase local chat view?')) {
+        if (confirm('Clear local view? (Group messages stay in database)')) {
             conversationHistory = [];
             if (!currentRoomId) localStorage.removeItem('lust_chat_history');
             chatMessages.innerHTML = '';
@@ -726,7 +855,7 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
     });
 
     // ──────────────────────────────────────────────
-    // INITIALIZATION & RESTORE
+    // INITIALIZATION
     // ──────────────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
     const roomFromUrl = params.get('room');
