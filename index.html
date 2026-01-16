@@ -5,51 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lust Chat | Private Messenger</title>
     
-    <!-- Dependencies -->
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        const SupabaseFactory = window.supabase;
+        var supabase;
+        if (window.mySupabaseInstance) {
+            supabase = window.mySupabaseInstance;
+        } else {
+            supabase = SupabaseFactory.createClient(
+                'https://ogffcnwsokpxxrngpkrp.supabase.co',
+                'sb_publishable_BDYck1wYrkrkgmB1KVXfEw_n3qBJw0o'
+            );
+            window.mySupabaseInstance = supabase;
+        }
+    </script>
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Nunito', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
+                    fontFamily: { sans: ['Nunito', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
-                        lust: {
-                            primary: '#e11d48',
-                            light: '#fb7185',
-                            dark: '#881337',
-                            glow: 'rgba(225, 29, 72, 0.5)'
-                        },
-                        night: {
-                            bg: '#050505',
-                            surface: '#121212',
-                            bubble: '#1e1e1e',
-                            input: '#27272a'
-                        }
+                        lust: { primary: '#e11d48', light: '#fb7185', dark: '#881337', glow: 'rgba(225, 29, 72, 0.5)' },
+                        night: { bg: '#050505', surface: '#121212', bubble: '#1e1e1e', input: '#27272a' }
                     },
                     animation: {
                         'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite',
                         'heartbeat-slow': 'heartbeat 4s ease-in-out infinite',
                     },
                     keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(10px) scale(0.98)' },
-                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
-                        },
-                        heartbeat: {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.12)' }
-                        }
+                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(10px) scale(0.98)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.12)' } }
                     }
                 }
             }
@@ -57,12 +52,10 @@
     </script>
 
     <style>
-        /* Theme variations */
         [data-theme="sultry-red"] { --lust-primary: #c026d3; --lust-light: #f472b6; --lust-dark: #701a75; background: linear-gradient(to bottom, #1a0000, #330000); }
         [data-theme="midnight-velvet"] { --lust-primary: #a855f7; --lust-light: #c084fc; background: #0f001a; }
         [data-theme="neon-desire"] { --lust-primary: #ff00aa; --lust-light: #ff69b4; background: linear-gradient(135deg, #0d001a, #1a0033); --glow: rgba(255,0,170,0.6); }
 
-        /* Mobile Optimizations */
         button, select, input, textarea { touch-action: manipulation; min-width: 44px; min-height: 44px; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #050505; }
@@ -70,20 +63,17 @@
         ::-webkit-scrollbar-thumb:hover { background: #e11d48; }
 
         .markdown-body p { margin-bottom: 0.5em; line-height: 1.5; color: #e5e7eb; }
-        .markdown-body p:last-child { margin-bottom: 0; }
         .markdown-body pre { background: #000; padding: 0.75rem; border-radius: 0.75rem; overflow-x: auto; margin: 0.5rem 0; border: 1px solid #333; }
         .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #fb7185; }
         .markdown-body :not(pre) > code { background: rgba(225, 29, 72, 0.1); padding: 0.1em 0.3em; border-radius: 0.2em; }
         .markdown-body img { border-radius: 1rem; max-width: 100%; height: auto; margin-top: 0.5rem; border: 1px solid #333; }
 
-        .glass { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        
+        .glass { background: rgba(18,18,18,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .glow-on-hover:hover { box-shadow: 0 0 12px var(--glow, rgba(225,29,72,0.4)); transition: box-shadow 0.3s; }
     </style>
 </head>
 <body class="bg-night-bg text-gray-100 h-[100dvh] flex flex-col overflow-hidden font-sans selection:bg-lust-primary selection:text-white">
 
-    <!-- Header -->
     <header class="flex-none sticky top-0 z-30 glass px-3 py-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg shadow-lust-primary/5">
         <div class="flex items-center gap-2.5 flex-shrink-0">
             <div class="relative group cursor-pointer animate-heartbeat-slow">
@@ -119,6 +109,12 @@
                 </svg>
             </button>
 
+            <button id="room-btn" class="p-2 rounded-full hover:bg-white/5 text-rose-400 transition-colors glow-on-hover" aria-label="Create or join room">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM6 21a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </button>
+
             <button id="fullscreen-btn" class="p-2 rounded-full hover:bg-white/5 text-rose-400 transition-colors glow-on-hover" aria-label="Toggle fullscreen">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>
             </button>
@@ -133,7 +129,6 @@
         </div>
     </header>
 
-    <!-- Chat Area -->
     <main id="chat-messages" class="flex-1 overflow-y-auto px-4 py-6 space-y-5 scroll-smooth w-full pb-44">
         <div class="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-70 mt-4">
             <div class="w-24 h-24 rounded-full bg-night-surface border border-rose-900/30 flex items-center justify-center mb-2 shadow-[0_0_30px_rgba(225,29,72,0.2)]">
@@ -147,7 +142,6 @@
         </div>
     </main>
 
-    <!-- Input Area -->
     <div class="flex-none w-full bg-night-bg/95 backdrop-blur-md border-t border-white/5 px-3 py-4 fixed bottom-0 left-0 z-40">
         <div class="max-w-4xl mx-auto w-full relative">
             <div id="preview-container" class="hidden absolute bottom-full left-0 mb-3 ml-2 bg-night-surface border border-rose-900/50 p-2 rounded-2xl shadow-2xl animate-fade-in-up z-50">
@@ -183,7 +177,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal (kinks removed) -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-night-surface rounded-2xl shadow-2xl max-w-md w-full p-6 border border-lust-primary/30 animate-fade-in-up">
             <h3 class="text-xl font-bold text-lust-light mb-4">Your Profile 💋</h3>
@@ -218,7 +211,30 @@
         </div>
     </div>
 
+    <div id="room-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-night-surface rounded-2xl shadow-2xl max-w-md w-full p-6 border border-lust-primary/30 animate-fade-in-up">
+            <h3 class="text-xl font-bold text-lust-light mb-4">Private Lust Room</h3>
+            <p class="text-sm text-gray-400 mb-6">Create a new room or join one with your friend</p>
+
+            <div class="space-y-6">
+                <input id="room-code-input" type="text" placeholder="Enter room code or leave blank to create new" class="w-full bg-night-input border border-white/10 rounded-lg px-4 py-3 text-white focus:border-lust-primary outline-none text-center uppercase tracking-widest">
+                
+                <div class="flex gap-4">
+                    <button id="create-room-btn" class="flex-1 py-3 bg-gradient-to-r from-lust-primary to-rose-600 text-white rounded-xl hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition">Create Room</button>
+                    <button id="join-room-btn" class="flex-1 py-3 bg-gradient-to-r from-lust-light to-white text-black rounded-xl hover:shadow-[0_0_20px_rgba(251,113,133,0.4)] transition">Join Room</button>
+                </div>
+
+                <div id="room-status" class="text-center text-sm text-rose-300 font-medium min-h-[1.5rem]"></div>
+
+                <button id="close-room-modal" class="w-full py-3 text-gray-400 hover:text-white transition">Close</button>
+            </div>
+        </div>
+    </div>
+
 <script>
+    // ──────────────────────────────────────────────
+    // MARKED + UTILS
+    // ──────────────────────────────────────────────
     const renderer = new marked.Renderer();
     renderer.code = function(code, language) {
         const validLang = !!(language && highlight.getLanguage(language));
@@ -229,18 +245,12 @@
 
     function addHyphens(str) { return str.split('').join('-'); }
     function removeHyphens(str) { return str.replace(/-/g, ''); }
-    
-    function stripEmojis(str) {
-        try { return str.replace(/\p{Extended_Pictographic}/gu, ''); }
-        catch (e) {
-            return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
-        }
-    }
+    function stripEmojis(str) { return str.replace(/[^\p{L}\p{N}\p{P}\p{Z}^$\n]/gu, ''); }
+    function vibrateShort() { if (navigator.vibrate) navigator.vibrate(60); }
 
-    function vibrateShort() {
-        if (navigator.vibrate) navigator.vibrate(60);
-    }
-
+    // ──────────────────────────────────────────────
+    // DOM + STATE
+    // ──────────────────────────────────────────────
     const chatMessages = document.getElementById('chat-messages');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
@@ -249,25 +259,33 @@
     const previewContainer = document.getElementById('preview-container');
     const previewImg = document.getElementById('preview-img');
     const themeSelect = document.getElementById('theme-select');
-    const aiAvatarSelect = document.getElementById('ai-avatar-select');
     const profileModal = document.getElementById('profile-modal');
     const profileForm = document.getElementById('profile-form');
     const profileBtn = document.getElementById('profile-btn');
+    const roomBtn = document.getElementById('room-btn');
+    const roomModal = document.getElementById('room-modal');
+    const roomCodeInput = document.getElementById('room-code-input');
+    const createRoomBtn = document.getElementById('create-room-btn');
+    const joinRoomBtn = document.getElementById('join-room-btn');
+    const roomStatus = document.getElementById('room-status');
+    const closeRoomModal = document.getElementById('close-room-modal');
 
     let conversationHistory = [];
     let isProcessing = false;
     let currentAttachment = null;
     let userProfile = JSON.parse(localStorage.getItem('lust_user_profile')) || {};
+    let currentRoomId = null;
+    let realtimeChannel = null;
 
-    function isProfileEmpty() {
-        return !userProfile.name || !userProfile.gender;
-    }
+    // Persist a unique Client ID for this browser so we know who "Me" is
+    const MY_CLIENT_ID = localStorage.getItem('lust_client_id') || Math.random().toString(36).substring(2);
+    localStorage.setItem('lust_client_id', MY_CLIENT_ID);
 
-    if (isProfileEmpty()) {
-        setTimeout(() => {
-            profileModal.classList.remove('hidden');
-        }, 1200);
-    }
+    // ──────────────────────────────────────────────
+    // PROFILE LOGIC
+    // ──────────────────────────────────────────────
+    function isProfileEmpty() { return !userProfile.name || !userProfile.gender; }
+    if (isProfileEmpty()) setTimeout(() => profileModal.classList.remove('hidden'), 1200);
 
     profileBtn.addEventListener('click', () => {
         document.getElementById('prof-name').value = userProfile.name || '';
@@ -278,13 +296,10 @@
         profileModal.classList.remove('hidden');
     });
 
-    document.getElementById('profile-cancel').addEventListener('click', () => {
-        profileModal.classList.add('hidden');
-    });
+    document.getElementById('profile-cancel').addEventListener('click', () => profileModal.classList.add('hidden'));
 
     profileForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
         userProfile = {
             name: document.getElementById('prof-name').value.trim(),
             gender: document.getElementById('prof-gender').value.trim(),
@@ -293,13 +308,222 @@
             build: document.getElementById('prof-build').value.trim(),
             updatedAt: new Date().toISOString()
         };
-
         localStorage.setItem('lust_user_profile', JSON.stringify(userProfile));
         profileModal.classList.add('hidden');
-        alert("Profile saved! Let's get naughty 😈");
     });
 
-    // Dynamic system prompt (no kinks)
+    // ──────────────────────────────────────────────
+    // ROOM LOGIC (FIXED: Alignment & Names)
+    // ──────────────────────────────────────────────
+    
+    roomBtn.addEventListener('click', () => {
+        if (currentRoomId) {
+            if(confirm(`Leave room ${currentRoomId}?`)) {
+                leaveRoom();
+            }
+        } else {
+            roomModal.classList.remove('hidden');
+        }
+    });
+    
+    closeRoomModal.addEventListener('click', () => roomModal.classList.add('hidden'));
+
+    createRoomBtn.addEventListener('click', () => {
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        joinRoom(code);
+    });
+
+    joinRoomBtn.addEventListener('click', () => {
+        const code = roomCodeInput.value.trim().toUpperCase();
+        if (code) joinRoom(code);
+    });
+
+    // --- FETCH HISTORY ---
+    async function loadRoomHistory(roomId) {
+        if (!supabase) return;
+
+        chatMessages.innerHTML = '';
+        
+        const spacer = document.createElement('div');
+        spacer.className = "flex flex-col items-center justify-center h-[20vh] text-center opacity-50";
+        spacer.innerHTML = `<p class="text-xs text-lust-light">Syncing encrypted history for Room ${roomId}...</p>`;
+        chatMessages.appendChild(spacer);
+
+        const { data, error } = await supabase
+            .from('chat_messages')
+            .select('*')
+            .eq('room_id', roomId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error("History load failed:", error);
+            return;
+        }
+
+        spacer.remove();
+
+        if (data && data.length > 0) {
+            data.forEach(msg => {
+                // IMPORTANT: Alignment Logic
+                // If it's the Bot -> 'assistant' (Left)
+                // If it's ME (ID matches) -> 'user' (Right)
+                // If it's another Human -> 'friend' (Left)
+                let role;
+                if (msg.nickname === 'AI_BOT') {
+                    role = 'assistant';
+                } else if (msg.client_id === MY_CLIENT_ID) {
+                    role = 'user';
+                } else {
+                    role = 'friend';
+                }
+                
+                renderMessageToUI(role, msg.content, false, null, msg.nickname);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+            renderMessageToUI('assistant', 'Room created. Waiting for secrets... 🤫', false, null, 'System');
+        }
+    }
+
+    // --- JOIN & LISTEN ---
+    async function joinRoom(roomId) {
+        if (!supabase) return alert("Database not connected");
+
+        if (realtimeChannel) await realtimeChannel.unsubscribe();
+
+        currentRoomId = roomId;
+        localStorage.setItem('lust_active_room', roomId);
+        
+        roomStatus.innerHTML = `Connecting to ${roomId}...`;
+
+        realtimeChannel = supabase.channel(`room:${roomId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => {
+                const msg = payload.new;
+                
+                // Only render if it's NOT me (I render my own optimistically)
+                // OR if it is the Bot responding to someone else
+                if (msg.client_id !== MY_CLIENT_ID) {
+                    
+                    let role = 'friend'; // Default to other human
+                    if (msg.nickname === 'AI_BOT') role = 'assistant';
+
+                    renderMessageToUI(role, msg.content, false, null, msg.nickname);
+                    vibrateShort();
+                }
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    roomStatus.innerHTML = `Joined: ${roomId}`;
+                    roomBtn.classList.add('text-lust-primary', 'bg-white/10');
+                    setTimeout(() => roomModal.classList.add('hidden'), 500);
+                    await loadRoomHistory(roomId);
+                }
+            });
+    }
+
+    async function leaveRoom() {
+        if (realtimeChannel) await realtimeChannel.unsubscribe();
+        currentRoomId = null;
+        localStorage.removeItem('lust_active_room');
+        roomBtn.classList.remove('text-lust-primary', 'bg-white/10');
+        chatMessages.innerHTML = ''; 
+        
+        const intro = `
+        <div class="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-70 mt-4">
+            <h2 class="text-2xl font-bold text-white tracking-wide">Lust Chat</h2>
+            <p class="text-sm text-gray-400">You have left the private room.<br>Messages are cleared locally.</p>
+        </div>`;
+        chatMessages.innerHTML = intro;
+    }
+
+    // ──────────────────────────────────────────────
+    // UI RENDERING (Updated for Avatars & Names)
+    // ──────────────────────────────────────────────
+    function renderMessageToUI(role, content, isHtml = false, modelUsed = null, nickname = 'LustBot') {
+        if (chatMessages.querySelector('h2')) chatMessages.innerHTML = '';
+
+        const wrapperDiv = document.createElement('div');
+        
+        // "user" = Right Side (Me)
+        // "assistant" or "friend" = Left Side (Them)
+        const isMe = role === 'user';
+        
+        wrapperDiv.className = `flex w-full ${isMe ? 'justify-end' : 'justify-start items-end'} mb-6 animate-fade-in-up group`;
+
+        // Avatar Logic (Only for Left side)
+        if (!isMe) {
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = "w-11 h-11 rounded-full flex-shrink-0 mr-3 shadow-[0_0_20px_rgba(225,29,72,0.5)] overflow-hidden border-2 border-lust-primary/60 bg-night-surface relative cursor-pointer hover:scale-110 transition-transform duration-300";
+
+            const img = document.createElement('img');
+            
+            // If it's the Bot, use the hot image. If it's a Human Friend, use a generated avatar with their initials.
+            if (role === 'assistant' || nickname === 'LustBot') {
+                img.src = "https://images.pexels.com/photos/12667034/pexels-photo-12667034.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop";
+            } else {
+                // Generate avatar based on name
+                img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nickname)}&background=random&color=fff&size=128`;
+            }
+            
+            img.alt = nickname;
+            img.className = "w-full h-full object-cover";
+
+            avatarDiv.appendChild(img);
+            wrapperDiv.appendChild(avatarDiv);
+        }
+
+        const bubbleContainer = document.createElement('div');
+        bubbleContainer.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[75%]`; 
+
+        // Show Nickname if it's not Me
+        if (!isMe && nickname) {
+            const nameSpan = document.createElement('span');
+            nameSpan.className = "text-xs text-rose-400/90 mb-1 ml-2 font-medium tracking-wide";
+            nameSpan.textContent = nickname;
+            bubbleContainer.appendChild(nameSpan);
+        }
+
+        const bubble = document.createElement('div');
+        bubble.className = `px-5 py-3.5 relative text-[15px] leading-relaxed break-words shadow-lg ${
+            isMe 
+            ? 'text-white rounded-[22px] rounded-br-sm bg-gradient-to-r from-orange-600 to-rose-600 shadow-rose-900/40 opacity-95 border-l-4 border-lust-light' 
+            : 'text-gray-100 rounded-[22px] rounded-bl-sm bg-gradient-to-r from-pink-900/90 to-purple-950/90 border border-white/5 shadow-purple-900/30 backdrop-blur-sm'
+        } glow-on-hover`;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'markdown-body';
+
+        if (isHtml) {
+            contentDiv.innerHTML = content;
+        } else if (Array.isArray(content)) {
+            let html = '';
+            content.forEach(item => {
+                if (item.type === 'image_url') html += `<img src="${item.image_url.url}" class="rounded-xl mb-2 border border-white/20 shadow-lg">`;
+                if (item.type === 'text') html += marked.parse(item.text);
+            });
+            contentDiv.innerHTML = html;
+        } else {
+            contentDiv.innerHTML = marked.parse(content);
+        }
+
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timeSpan = document.createElement('div');
+        timeSpan.className = "text-xs opacity-70 mt-1.5 text-right";
+        timeSpan.textContent = time;
+        contentDiv.appendChild(timeSpan);
+
+        bubble.appendChild(contentDiv);
+        bubbleContainer.appendChild(bubble);
+        wrapperDiv.appendChild(bubbleContainer);
+        
+        chatMessages.appendChild(wrapperDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return wrapperDiv;
+    }
+
+    // ──────────────────────────────────────────────
+    // SYSTEM INSTRUCTION & CHAT HANDLER
+    // ──────────────────────────────────────────────
     function getSystemInstruction() {
         return {
             role: "system",
@@ -334,71 +558,13 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
         };
     }
 
-    function renderMessageToUI(role, content, isHtml = false, modelUsed = null) {
-        if (chatMessages.querySelector('h2')) chatMessages.innerHTML = '';
-
-        const wrapperDiv = document.createElement('div');
-        const isUser = role === 'user';
-        wrapperDiv.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start items-end'} mb-5 animate-fade-in-up group`;
-
-        if (!isUser) {
-            const avatarDiv = document.createElement('div');
-            avatarDiv.className = "w-9 h-9 rounded-full flex-shrink-0 mr-3 shadow-lg overflow-hidden border-2 border-lust-primary/40 bg-night-surface";
-            const avatarImg = document.createElement('img');
-            const avatarType = aiAvatarSelect?.value || 'default';
-            const seed = avatarType === 'dominant' ? 'dominant-man-123' :
-                         avatarType === 'submissive' ? 'submissive-woman-456' :
-                         'seductive-siren-789';
-            avatarImg.src = `https://picsum.photos/seed/${seed}/150`;
-            avatarImg.alt = avatarType + " avatar";
-            avatarImg.className = "w-full h-full object-cover";
-            avatarDiv.appendChild(avatarImg);
-            wrapperDiv.appendChild(avatarDiv);
-        }
-
-        const bubble = document.createElement('div');
-        bubble.className = `max-w-[80%] px-5 py-3.5 relative text-[15px] leading-relaxed break-words shadow-lg ${
-            isUser 
-            ? 'user-bubble text-white rounded-[22px] rounded-br-sm bg-gradient-to-r from-orange-500 to-rose-600 shadow-rose-900/30' 
-            : 'ai-bubble text-gray-100 rounded-[22px] rounded-bl-sm bg-gradient-to-r from-pink-600 to-purple-600 shadow-purple-900/20'
-        } glow-on-hover`;
-
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'markdown-body';
-        
-        if (isHtml) {
-            contentDiv.innerHTML = content;
-        } else if (Array.isArray(content)) {
-            let html = '';
-            content.forEach(item => {
-                if (item.type === 'image_url') html += `<img src="${item.image_url.url}" class="rounded-xl mb-2 border border-white/20 shadow-lg">`;
-                if (item.type === 'text') html += marked.parse(item.text);
-            });
-            contentDiv.innerHTML = html;
-        } else {
-            contentDiv.innerHTML = marked.parse(content);
-        }
-
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const timeSpan = document.createElement('div');
-        timeSpan.className = "text-xs opacity-70 mt-1.5 text-right";
-        timeSpan.textContent = time;
-        contentDiv.appendChild(timeSpan);
-
-        bubble.appendChild(contentDiv);
-        wrapperDiv.appendChild(bubble);
-        chatMessages.appendChild(wrapperDiv);
-        
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        return wrapperDiv;
-    }
-
     async function handleChat() {
         const plainText = userInput.value.trim();
         if ((!plainText && !currentAttachment) || isProcessing) return;
 
         vibrateShort();
 
+        // 1. Render User Message Locally (Optimistic UI - ALWAYS RIGHT)
         let displayContent = plainText;
         if (currentAttachment) {
             displayContent = [
@@ -406,8 +572,9 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
                 { type: "image_url", image_url: { url: currentAttachment } }
             ];
         }
-        renderMessageToUI('user', displayContent);
+        renderMessageToUI('user', displayContent); // 'user' = Right Side
 
+        // 2. Prepare Data for AI
         const textWithoutEmojis = stripEmojis(plainText);
         let textToEncrypt = textWithoutEmojis || (currentAttachment ? "I-m-a-g-e" : " ");
         const encryptedText = addHyphens(textToEncrypt);
@@ -418,6 +585,17 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
                 { type: "text", text: encryptedText },
                 { type: "image_url", image_url: { url: currentAttachment } }
             ];
+        }
+
+        // 3. Save to Supabase
+        if (currentRoomId) {
+            await supabase.from('chat_messages').insert({
+                room_id: currentRoomId,
+                nickname: userProfile.name || 'Anonymous',
+                content: plainText, 
+                client_id: MY_CLIENT_ID,
+                created_at: new Date().toISOString()
+            });
         }
 
         conversationHistory.push({ role: "user", content: apiContent });
@@ -432,7 +610,7 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
         isProcessing = true;
         sendBtn.disabled = true;
 
-        const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1.5 py-1.5"><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.15s]"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.3s]"></div></div>', true);
+        const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1.5 py-1.5"><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.15s]"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.3s]"></div></div>', true, null, 'LustBot');
 
         try {
             const apiHistory = [getSystemInstruction(), ...conversationHistory];
@@ -456,9 +634,25 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
             if (!decryptedReply.trim()) decryptedReply = "Mmm... I'm speechless... 😈";
 
             loadingDiv.remove();
-            renderMessageToUI('assistant', decryptedReply);
-            conversationHistory.push({ role: "assistant", content: encryptedReply, model: primaryModel });
-            localStorage.setItem('lust_chat_history', JSON.stringify(conversationHistory));
+            
+            // Render locally (AI reply is always 'assistant' -> Left)
+            renderMessageToUI('assistant', decryptedReply, false, primaryModel, 'LustBot');
+            
+            conversationHistory.push({ role: "assistant", content: encryptedReply });
+
+            if (currentRoomId) {
+                await supabase.from('chat_messages').insert({
+                    room_id: currentRoomId,
+                    nickname: 'AI_BOT',
+                    content: decryptedReply,
+                    client_id: MY_CLIENT_ID,
+                    created_at: new Date().toISOString()
+                });
+            }
+
+            if (!currentRoomId) {
+                localStorage.setItem('lust_chat_history', JSON.stringify(conversationHistory));
+            }
 
             setTimeout(vibrateShort, 200);
 
@@ -466,7 +660,7 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
             console.error(error);
             loadingDiv.remove();
             conversationHistory.pop();
-            renderMessageToUI('assistant', `<span class="text-rose-400 text-sm">Connection slipped away… try again, lover? 💋</span>`, true);
+            renderMessageToUI('assistant', `<span class="text-rose-400 text-sm">Connection slipped away… try again, lover? 💋</span>`, true, null, 'LustBot');
         } finally {
             isProcessing = false;
             sendBtn.disabled = false;
@@ -474,20 +668,9 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
         }
     }
 
-    // Event Listeners & Init
-    themeSelect.addEventListener('change', (e) => {
-        document.documentElement.setAttribute('data-theme', e.target.value);
-        localStorage.setItem('lust_theme', e.target.value);
-    });
-    const savedTheme = localStorage.getItem('lust_theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeSelect.value = savedTheme;
-
-    document.getElementById('fullscreen-btn').addEventListener('click', () => {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
-    });
-
+    // ──────────────────────────────────────────────
+    // GENERAL EVENT LISTENERS
+    // ──────────────────────────────────────────────
     sendBtn.addEventListener('click', handleChat);
     userInput.addEventListener('keydown', (e) => { 
         if (e.key === 'Enter' && !e.shiftKey) { 
@@ -495,6 +678,7 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
             handleChat(); 
         }
     });
+
     userInput.addEventListener('input', function() {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 140) + 'px';
@@ -513,39 +697,68 @@ ${userProfile.build ? `Body: ${userProfile.build}` : ''}
         reader.readAsDataURL(file);
         e.target.value = '';
     });
+
     document.getElementById('remove-preview').addEventListener('click', () => {
         currentAttachment = null;
         previewContainer.classList.add('hidden');
     });
 
+    themeSelect.addEventListener('change', (e) => {
+        document.documentElement.setAttribute('data-theme', e.target.value);
+        localStorage.setItem('lust_theme', e.target.value);
+    });
+    
+    const savedTheme = localStorage.getItem('lust_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeSelect.value = savedTheme;
+
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+    });
+
     document.getElementById('clear-chat').addEventListener('click', () => {
-        if (confirm('Erase all our dirty secrets?')) {
+        if (confirm('Erase local chat view?')) {
             conversationHistory = [];
-            localStorage.removeItem('lust_chat_history');
-            chatMessages.innerHTML = document.querySelector('main').innerHTML;
+            if (!currentRoomId) localStorage.removeItem('lust_chat_history');
+            chatMessages.innerHTML = '';
         }
     });
 
-    // Load saved history
-    const savedHist = localStorage.getItem('lust_chat_history');
-    if (savedHist) {
-        try {
-            let loaded = JSON.parse(savedHist);
-            if (Array.isArray(loaded)) {
-                conversationHistory = loaded.filter(m => m && typeof m.content !== 'undefined');
-                conversationHistory.forEach(m => {
-                    let displayContent = m.content;
-                    if (typeof m.content === 'string') displayContent = removeHyphens(m.content);
-                    else if (Array.isArray(m.content)) {
-                        displayContent = m.content.map(item => 
-                            item.type === 'text' ? { ...item, text: removeHyphens(item.text) } : item
-                        );
-                    }
-                    renderMessageToUI(m.role, displayContent, false, m.model);
-                });
+    // ──────────────────────────────────────────────
+    // INITIALIZATION & RESTORE
+    // ──────────────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const roomFromUrl = params.get('room');
+    const roomFromStorage = localStorage.getItem('lust_active_room');
+
+    if (roomFromUrl) {
+        joinRoom(roomFromUrl);
+    } else if (roomFromStorage) {
+        console.log("Restoring session for room:", roomFromStorage);
+        joinRoom(roomFromStorage);
+    } else {
+        const savedHist = localStorage.getItem('lust_chat_history');
+        if (savedHist) {
+            try {
+                let loaded = JSON.parse(savedHist);
+                if (Array.isArray(loaded)) {
+                    conversationHistory = loaded.filter(m => m && typeof m.content !== 'undefined');
+                    conversationHistory.forEach(m => {
+                        let displayContent = m.content;
+                        if (typeof m.content === 'string') displayContent = removeHyphens(m.content);
+                        else if (Array.isArray(m.content)) {
+                            displayContent = m.content.map(item => 
+                                item.type === 'text' ? { ...item, text: removeHyphens(item.text) } : item
+                            );
+                        }
+                        const nickname = m.role === 'assistant' ? 'LustBot' : (userProfile.name || 'You');
+                        renderMessageToUI(m.role === 'user' ? 'user' : 'assistant', displayContent, false, m.model, nickname);
+                    });
+                }
+            } catch(e) {
+                console.error("History load error", e);
             }
-        } catch(e) {
-            console.error("History load error", e);
         }
     }
 </script>
