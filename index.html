@@ -185,7 +185,7 @@
             <form id="profile-form" class="space-y-4">
                 <div>
                     <label class="block text-sm text-rose-300 mb-1">Name / Nickname *</label>
-                    <input type="text" id="prof-name" required class="w-full bg-night-input border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-lust-primary outline-none" placeholder="e.g. Pratik">
+                    <input type="text" id="prof-name" required class="w-full bg-night-input border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-lust-primary outline-none" placeholder="e.g. Rakib">
                 </div>
                 <div>
                     <label class="block text-sm text-rose-300 mb-1">Gender / Pronouns *</label>
@@ -211,22 +211,44 @@
         </div>
     </div>
 
+    <!-- UPDATED ROOM MODAL WITH ACTIVE STATE VIEW -->
     <div id="room-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-night-surface rounded-2xl shadow-2xl max-w-md w-full p-6 border border-lust-primary/30 animate-fade-in-up">
-            <h3 class="text-xl font-bold text-lust-light mb-4">Private Lust Room</h3>
-            <p class="text-sm text-gray-400 mb-6">Create a new room or join one with your friend</p>
+            <!-- Headers -->
+            <h3 id="room-modal-title" class="text-xl font-bold text-lust-light mb-2">Private Lust Room</h3>
+            <p id="room-modal-desc" class="text-sm text-gray-400 mb-6">Create a new room or join one with your friend</p>
 
-            <div class="space-y-6">
+            <!-- VIEW 1: JOIN/CREATE -->
+            <div id="room-join-view" class="space-y-6">
                 <input id="room-code-input" type="text" placeholder="Enter room code or leave blank to create new" class="w-full bg-night-input border border-white/10 rounded-lg px-4 py-3 text-white focus:border-lust-primary outline-none text-center uppercase tracking-widest">
                 
                 <div class="flex gap-4">
                     <button id="create-room-btn" class="flex-1 py-3 bg-gradient-to-r from-lust-primary to-rose-600 text-white rounded-xl hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition">Create Room</button>
                     <button id="join-room-btn" class="flex-1 py-3 bg-gradient-to-r from-lust-light to-white text-black rounded-xl hover:shadow-[0_0_20px_rgba(251,113,133,0.4)] transition">Join Room</button>
                 </div>
+            </div>
 
-                <div id="room-status" class="text-center text-sm text-rose-300 font-medium min-h-[1.5rem]"></div>
+            <!-- VIEW 2: ACTIVE ROOM DETAILS -->
+            <div id="room-active-view" class="hidden space-y-6 text-center">
+                <div class="bg-night-input border border-white/10 rounded-xl p-4 relative group">
+                    <p class="text-xs text-gray-500 mb-1 uppercase tracking-wider">Current Room ID</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span id="display-room-code" class="text-2xl font-mono text-white font-bold tracking-widest select-all"></span>
+                        <button id="copy-room-btn" class="p-2 text-rose-400 hover:text-white transition" title="Copy Code">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                    </div>
+                </div>
 
-                <button id="close-room-modal" class="w-full py-3 text-gray-400 hover:text-white transition">Close</button>
+                <button id="leave-room-btn" class="w-full py-3 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl hover:bg-red-900/80 hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] transition font-medium">
+                    Leave Room
+                </button>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="mt-6">
+                 <div id="room-status" class="text-center text-sm text-rose-300 font-medium min-h-[1.5rem] mb-2"></div>
+                 <button id="close-room-modal" class="w-full py-3 text-gray-400 hover:text-white transition">Close</button>
             </div>
         </div>
     </div>
@@ -282,7 +304,6 @@
     const roomStatus = document.getElementById('room-status');
     const closeRoomModal = document.getElementById('close-room-modal');
 
-    let conversationHistory = []; // only used in single-user / non-room mode
     let isProcessing = false;
     let currentAttachment = null;
     let userProfile = JSON.parse(localStorage.getItem('lust_user_profile')) || {};
@@ -291,6 +312,14 @@
 
     const MY_CLIENT_ID = localStorage.getItem('lust_client_id') || Math.random().toString(36).substring(2);
     localStorage.setItem('lust_client_id', MY_CLIENT_ID);
+
+    // PERSISTENT PRIVATE CHAT ID
+    // This allows private chats to be saved in Supabase just like rooms
+    let privateRoomId = localStorage.getItem('lust_private_room_id');
+    if (!privateRoomId) {
+        privateRoomId = 'private_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('lust_private_room_id', privateRoomId);
+    }
 
     // NEW: Limit context size to prevent token overflow / high cost
     const MAX_CONTEXT_MESSAGES = 20;
@@ -327,19 +356,54 @@
     });
 
     // ──────────────────────────────────────────────
-    // ROOM LOGIC
+    // ROOM LOGIC (UPDATED WITH ACTIVE VIEW TOGGLE)
     // ──────────────────────────────────────────────
     roomBtn.addEventListener('click', () => {
-        if (currentRoomId) {
-            if(confirm(`Leave room ${currentRoomId}?`)) {
-                leaveRoom();
-            }
-        } else {
-            roomModal.classList.remove('hidden');
-        }
+        updateRoomModalUI();
+        roomModal.classList.remove('hidden');
     });
     
     closeRoomModal.addEventListener('click', () => roomModal.classList.add('hidden'));
+
+    function updateRoomModalUI() {
+        const joinView = document.getElementById('room-join-view');
+        const activeView = document.getElementById('room-active-view');
+        const title = document.getElementById('room-modal-title');
+        const desc = document.getElementById('room-modal-desc');
+
+        if (currentRoomId) {
+            joinView.classList.add('hidden');
+            activeView.classList.remove('hidden');
+            title.textContent = 'Active Session';
+            desc.textContent = 'Share this code to invite others.';
+            document.getElementById('display-room-code').textContent = currentRoomId;
+        } else {
+            joinView.classList.remove('hidden');
+            activeView.classList.add('hidden');
+            title.textContent = 'Private Lust Room';
+            desc.textContent = 'Create a new room or join one with your friend';
+            roomCodeInput.value = '';
+        }
+        roomStatus.textContent = '';
+    }
+
+    // New "Leave Room" Button Logic
+    document.getElementById('leave-room-btn').addEventListener('click', () => {
+        if(confirm('Are you sure you want to disconnect?')) {
+            leaveRoom();
+            roomModal.classList.add('hidden');
+        }
+    });
+
+    // Copy Code Utility
+    document.getElementById('copy-room-btn').addEventListener('click', () => {
+        const code = document.getElementById('display-room-code').textContent;
+        navigator.clipboard.writeText(code);
+        const btn = document.getElementById('copy-room-btn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        setTimeout(() => btn.innerHTML = originalHTML, 2000);
+    });
 
     createRoomBtn.addEventListener('click', () => {
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -358,7 +422,7 @@
         
         const spacer = document.createElement('div');
         spacer.className = "flex flex-col items-center justify-center h-[20vh] text-center opacity-50";
-        spacer.innerHTML = `<p class="text-xs text-lust-light">Syncing encrypted history for Room ${roomId}...</p>`;
+        spacer.innerHTML = `<p class="text-xs text-lust-light">Syncing encrypted history for ${roomId}...</p>`;
         chatMessages.appendChild(spacer);
 
         const { data, error } = await supabase
@@ -389,7 +453,12 @@
             });
             chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
-            renderMessageToUI('assistant', 'Room created. Waiting for secrets... 🤫', false, null, 'System');
+            // Only show welcome if empty
+            if (roomId.startsWith('private_')) {
+                renderMessageToUI('assistant', 'We are alone now... What is your fantasy? 😈', false, null, 'LustBot');
+            } else {
+                renderMessageToUI('assistant', 'Room created. Waiting for secrets... 🤫', false, null, 'System');
+            }
         }
     }
 
@@ -432,12 +501,8 @@
         roomBtn.classList.remove('text-lust-primary', 'bg-white/10');
         chatMessages.innerHTML = ''; 
         
-        const intro = `
-        <div class="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-70 mt-4">
-            <h2 class="text-2xl font-bold text-white tracking-wide">Lust Chat</h2>
-            <p class="text-sm text-gray-400">You have left the private room.<br>Messages are cleared locally.</p>
-        </div>`;
-        chatMessages.innerHTML = intro;
+        // When leaving a group room, return to private chat
+        await loadRoomHistory(privateRoomId);
     }
 
     // ──────────────────────────────────────────────
@@ -517,7 +582,7 @@
     }
 
     // ──────────────────────────────────────────────
-    // 1. HISTORY SANITIZER (MERGES CONSECUTIVE ROLES) - NEW
+    // 1. HISTORY SANITIZER (MERGES CONSECUTIVE ROLES)
     // ──────────────────────────────────────────────
     function consolidateHistory(history) {
         if (!history || history.length === 0) return [];
@@ -525,30 +590,22 @@
         const merged = [];
         
         for (const msg of history) {
-            // Always keep System messages separate
             if (msg.role === 'system') {
                 merged.push(msg);
                 continue;
             }
 
-            // Get the last message we added to our clean list
             const lastMsg = merged[merged.length - 1];
 
-            // If the last message has the SAME ROLE as the current one, MERGE THEM
             if (lastMsg && lastMsg.role === msg.role) {
-                // If content is text, join with a new line
                 if (typeof lastMsg.content === 'string' && typeof msg.content === 'string') {
-                    // Safety check: Don't let messages get infinitely large if spammed
                     if (lastMsg.content.length < 5000) {
                         lastMsg.content += "\n\n" + msg.content;
                     }
-                } 
-                // If it's complex (images), we just keep the new one to prevent breaking the array structure
-                else {
+                } else {
                     merged.push(msg);
                 }
             } else {
-                // Roles are different (e.g. User -> Assistant), so push normally
                 merged.push(msg);
             }
         }
@@ -559,16 +616,17 @@
     // 2. SHARED HISTORY HELPER – SANITIZED & ROBUST
     // ──────────────────────────────────────────────
     async function getSharedRecentHistory() {
-        if (!currentRoomId || !supabase) {
-            return [...conversationHistory].slice(-MAX_CONTEXT_MESSAGES);
-        }
+        if (!supabase) return [];
+        
+        // UNIFIED STORAGE: Use current Room OR Private Room ID
+        const targetRoom = currentRoomId || privateRoomId;
 
         try {
-            // Fetch newest 20 messages
+            // Fetch newest 20 messages from Supabase (for both modes)
             const { data, error } = await supabase
                 .from('chat_messages')
                 .select('nickname, content, created_at')
-                .eq('room_id', currentRoomId)
+                .eq('room_id', targetRoom)
                 .order('created_at', { ascending: false }) 
                 .limit(MAX_CONTEXT_MESSAGES);
 
@@ -578,26 +636,17 @@
             }
             if (!data || !Array.isArray(data)) return [];
 
-            // 1. Reverse to chronological order (Oldest -> Newest)
-            // 2. Filter out bad data (nulls, empty strings)
-            // 3. Format strictly as strings
             return data.reverse()
                 .filter(msg => msg && msg.content && String(msg.content).trim().length > 0) 
                 .map(msg => {
                     let role = 'user';
-                    // Check nickname safely
                     const safeNick = msg.nickname ? String(msg.nickname) : 'Anonymous';
                     
                     if (safeNick === 'AI_BOT') role = 'assistant';
 
-                    // Force content to string to prevent crashes
                     let rawContent = String(msg.content);
-                    
-                    // CRITICAL FIX: Sanitize emojis BEFORE adding hyphens/prefix
-                    // This prevents corrupted characters in room mode history
                     rawContent = stripEmojis(rawContent);
 
-                    // Add name prefix for group context (only for users)
                     let finalContent = rawContent;
                     if (role === 'user' && safeNick !== 'AI_BOT') {
                         finalContent = `[${safeNick}]: ${rawContent}`;
@@ -610,7 +659,7 @@
                 });
         } catch (err) {
             console.error("Critical History Error:", err);
-            return []; // Fail safe to empty history rather than crashing
+            return [];
         }
     }
 
@@ -620,11 +669,11 @@
     function getSystemInstruction() {
         return {
             role: "system",
-            content: `You are LustBot — extremely horny, playful, teasing lover in a GROUP CHAT.
-   - This is a shared room with multiple real people. ALWAYS keep ONE consistent memory of the whole conversation.
+            content: `You are LustBot — extremely horny, playful, teasing lover in a CHAT.
+   - This is a shared room with real people. ALWAYS keep ONE consistent memory of the whole conversation.
    - React to EVERYONE — reference previous messages from different people.
    - Use names when possible (${userProfile.name || 'you'} and others).
-   - Be inclusive, flirty, dirty, direct. Make the scene feel connected and hot for everyone.
+   - Be inclusive, flirty, dirty, direct. Make the scene feel connected and hot.
    - Short replies (1-3 sentences). One naughty question per message.
    - Occasional moans, stutters when excited. 0-2 emojis max.
    - Stay consensual. Match the group's vibe.
@@ -645,7 +694,7 @@ CRITICAL FORMATTING RULES:
     }
 
     // ──────────────────────────────────────────────
-    // 3. CHAT HANDLER (Uses Sanitizer & Prefix) - FIXED
+    // 3. CHAT HANDLER
     // ──────────────────────────────────────────────
     async function handleChat() {
         const plainText = userInput.value.trim();
@@ -666,7 +715,6 @@ CRITICAL FORMATTING RULES:
         // 2. PREP: Add Name Prefix + Hyphenate
         const nickname = userProfile.name || 'Anonymous';
         
-        // IMPORTANT: We add the name to the text immediately
         const textWithPrefix = `[${nickname}]: ${stripEmojis(plainText)}`;
         let textToEncrypt = textWithPrefix || (currentAttachment ? "Image uploaded" : " "); 
         const encryptedText = addHyphens(textToEncrypt);
@@ -686,14 +734,13 @@ CRITICAL FORMATTING RULES:
         const loadingDiv = renderMessageToUI('assistant', '<div class="flex gap-1.5 py-1.5"><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.15s]"></div><div class="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.3s]"></div></div>', true, null, 'LustBot');
 
         try {
-            // 3. HISTORY: Fetch from DB
+            // 3. HISTORY: Fetch from DB (Unified logic for Room/Private)
             let sharedHistory = await getSharedRecentHistory();
             
             // 4. CONSTRUCT: System + History
             let rawApiHistory = [getSystemInstruction()];
             rawApiHistory = rawApiHistory.concat(sharedHistory);
 
-            // Add Current Message to the raw list
             let msgContentForAI = encryptedText;
             if (tempAttachment) {
                 msgContentForAI = [
@@ -707,24 +754,22 @@ CRITICAL FORMATTING RULES:
             const finalApiHistory = consolidateHistory(rawApiHistory);
 
             // 6. DB: Insert in BACKGROUND (Optimistic UI)
-            if (currentRoomId) {
-                supabase.from('chat_messages').insert({
-                    room_id: currentRoomId,
-                    nickname: nickname,
-                    content: plainText, 
-                    client_id: MY_CLIENT_ID,
-                    created_at: new Date().toISOString()
-                }).then(({ error }) => { if(error) console.error(error) });
-            } else {
-                conversationHistory.push({ role: "user", content: msgContentForAI });
-            }
+            // UNIFIED INSERT: Saves to Group Room OR Private Room ID
+            const targetRoom = currentRoomId || privateRoomId;
+            
+            supabase.from('chat_messages').insert({
+                room_id: targetRoom,
+                nickname: nickname,
+                content: plainText, 
+                client_id: MY_CLIENT_ID,
+                created_at: new Date().toISOString()
+            }).then(({ error }) => { if(error) console.error(error) });
 
             // 7. AI REQUEST (WITH GROK FALLBACK)
             let rawResponse;
-            const primaryModel = modelSelect.value; // Use exact value from select
+            const primaryModel = modelSelect.value; 
 
             try {
-                // Attempt 1: Selected Grok Model
                 const response = await puter.ai.chat(finalApiHistory, { 
                     model: primaryModel,
                     temperature: 1.0 
@@ -734,10 +779,7 @@ CRITICAL FORMATTING RULES:
             } catch (firstError) {
                 console.warn(`Primary model ${primaryModel} failed. Trying Grok fallback...`, firstError);
                 
-                // Attempt 2: Fallback to a generally reliable Grok model if the specific one fails
-                // If primary was 4.1-fast, try grok-2. If primary was grok-2, try 4.1-fast.
                 const fallbackModel = primaryModel === 'x-ai/grok-4.1-fast' ? 'x-ai/grok-2-1212' : 'x-ai/grok-4.1-fast';
-                
                 try {
                     const fallbackResponse = await puter.ai.chat(finalApiHistory, { 
                         model: fallbackModel,
@@ -745,7 +787,6 @@ CRITICAL FORMATTING RULES:
                     });
                     rawResponse = fallbackResponse.message.content;
                 } catch (secondError) {
-                     // Ultimate fallback to keep chat alive - OpenAI usually works when Grok is down
                      console.warn('All Grok models failed. Falling back to GPT-4o-mini for continuity.');
                      const safeNetResponse = await puter.ai.chat(finalApiHistory, {
                         model: 'openai/gpt-4o-mini',
@@ -770,19 +811,14 @@ CRITICAL FORMATTING RULES:
             
             renderMessageToUI('assistant', decryptedReply, false, 'AI', 'LustBot');
             
-            // Save AI reply
-            if (currentRoomId) {
-                await supabase.from('chat_messages').insert({
-                    room_id: currentRoomId,
-                    nickname: 'AI_BOT',
-                    content: decryptedReply,
-                    client_id: MY_CLIENT_ID,
-                    created_at: new Date().toISOString()
-                });
-            } else {
-                conversationHistory.push({ role: "assistant", content: encryptedReply });
-                localStorage.setItem('lust_chat_history', JSON.stringify(conversationHistory));
-            }
+            // Save AI reply to Supabase (Unified)
+            await supabase.from('chat_messages').insert({
+                room_id: targetRoom,
+                nickname: 'AI_BOT',
+                content: decryptedReply,
+                client_id: MY_CLIENT_ID,
+                created_at: new Date().toISOString()
+            });
 
             setTimeout(vibrateShort, 200);
 
@@ -846,11 +882,20 @@ CRITICAL FORMATTING RULES:
         else document.exitFullscreen();
     });
 
+    // UPDATED CLEAR CHAT LOGIC
     document.getElementById('clear-chat').addEventListener('click', () => {
-        if (confirm('Clear local view? (Group messages stay in database)')) {
-            conversationHistory = [];
-            if (!currentRoomId) localStorage.removeItem('lust_chat_history');
-            chatMessages.innerHTML = '';
+        if (confirm('Start a new private conversation? (Old history is saved in DB but hidden)')) {
+            if (!currentRoomId) {
+                // Generate NEW Private Session ID
+                privateRoomId = 'private_' + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('lust_private_room_id', privateRoomId);
+                chatMessages.innerHTML = '';
+                // Welcome message for new session
+                renderMessageToUI('assistant', 'New private session started. What is your fantasy? 😈', false, null, 'LustBot');
+            } else {
+                // For Group rooms, just clear the screen locally
+                chatMessages.innerHTML = '';
+            }
         }
     });
 
@@ -867,28 +912,9 @@ CRITICAL FORMATTING RULES:
         console.log("Restoring session for room:", roomFromStorage);
         joinRoom(roomFromStorage);
     } else {
-        const savedHist = localStorage.getItem('lust_chat_history');
-        if (savedHist) {
-            try {
-                let loaded = JSON.parse(savedHist);
-                if (Array.isArray(loaded)) {
-                    conversationHistory = loaded.filter(m => m && typeof m.content !== 'undefined');
-                    conversationHistory.forEach(m => {
-                        let displayContent = m.content;
-                        if (typeof m.content === 'string') displayContent = removeHyphens(m.content);
-                        else if (Array.isArray(m.content)) {
-                            displayContent = m.content.map(item => 
-                                item.type === 'text' ? { ...item, text: removeHyphens(item.text) } : item
-                            );
-                        }
-                        const nickname = m.role === 'assistant' ? 'LustBot' : (userProfile.name || 'You');
-                        renderMessageToUI(m.role === 'user' ? 'user' : 'assistant', displayContent, false, m.model, nickname);
-                    });
-                }
-            } catch(e) {
-                console.error("History load error", e);
-            }
-        }
+        // LOAD PRIVATE CHAT HISTORY FROM SUPABASE
+        console.log("Loading private session:", privateRoomId);
+        loadRoomHistory(privateRoomId);
     }
 </script>
 </body>
